@@ -1,0 +1,246 @@
+/* Main styles for GF Frango Assado site */
+
+/* Basic resets and font */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: #333;
+}
+
+/* Header styles */
+header {
+  background: #cc0000; /* red background for header (brand name bar) */
+  color: #ffffff;
+  padding: 16px;
+  text-align: center;
+}
+header h1 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+/* Category navigation */
+.category-nav {
+  background: #ffffff;
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+.category-nav .filter-btn {
+  background: none;
+  border: none;
+  color: #cc0000;
+  font-weight: bold;
+  padding: 12px 16px;
+  cursor: pointer;
+  flex: 0 0 auto; /* prevent flex from stretching or shrinking too much */
+}
+.category-nav .filter-btn.active {
+  background: #cc0000;
+  color: #ffffff;
+  border-radius: 4px;
+}
+
+/* Main content and sections */
+main {
+  padding: 16px;
+  padding-bottom: 80px; /* space for bottom cart bar */
+}
+.menu-section {
+  display: none; /* hidden by default, except active one */
+}
+.menu-section h2 {
+  color: #cc0000;
+  font-size: 1.3em;
+  margin: 16px 0 8px;
+}
+.menu-section[data-category-section="frango"] {
+  display: block;
+}
+
+/* Menu items */
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+}
+.item-name {
+  font-weight: bold;
+}
+.item-price {
+  margin-left: 10px;
+  color: #555;
+}
+.quantity-picker {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0; /* do not shrink quantity controls */
+}
+.quantity-picker .minus,
+.quantity-picker .plus {
+  background: #cc0000;
+  color: #fff;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.quantity-picker .minus:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.quantity-picker .quantity {
+  display: none; /* hidden when quantity is 0 by default */
+  min-width: 20px;
+  text-align: center;
+  margin: 0 5px;
+  font-weight: bold;
+}
+
+/* When an item has quantity > 0, show the quantity and minus button */
+.item.added .quantity-picker .quantity,
+.item.added .quantity-picker .minus {
+  display: inline-block;
+}
+
+/* Cart bar (fixed bottom) */
+.cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #ccc;
+  text-align: center;
+  padding: 8px;
+}
+#cart-button {
+  background: #cc0000;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* Cart overlay styles */
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+}
+.cart-content {
+  background: #fff;
+  width: 90%;
+  max-width: 400px;
+  max-height: 90%;
+  margin: 40px auto;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-y: auto;
+  position: relative;
+}
+.cart-content h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+.cart-items {
+  margin-bottom: 16px;
+}
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.cart-item-name {
+  flex: 1 1 auto;
+}
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+}
+.cart-item-controls .minus,
+.cart-item-controls .plus {
+  background: #cc0000;
+  color: #fff;
+  border: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.cart-item-controls .quantity {
+  min-width: 20px;
+  text-align: center;
+  margin: 0 5px;
+}
+.cart-item-total {
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+.cart-total {
+  font-size: 1.1em;
+  margin-bottom: 16px;
+  text-align: right;
+}
+.cart-options {
+  margin-bottom: 16px;
+}
+.cart-options label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: normal;
+}
+.cart-options input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+  margin-top: 4px;
+}
+#whatsapp-button {
+  background: #25D366; /* WhatsApp green or use red? Using green to signify WhatsApp */
+  color: #fff;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+}
+#whatsapp-button:hover {
+  opacity: 0.9;
+}
+
+.cart-items p {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+}

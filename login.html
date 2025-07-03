@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - GF Frango Assado Admin</title>
+    <link rel="stylesheet" href="style.css"> <!-- Reutilize seu CSS existente se tiver estilos globais -->
+    <style>
+        /* Estilos básicos para o formulário de login */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            text-align: left;
+            color: #555;
+        }
+        .login-form input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .login-form button {
+            background-color: #d32f2f; /* Cor do seu tema, se aplicável */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .login-form button:hover {
+            background-color: #b71c1c;
+        }
+        .error-message {
+            color: #d32f2f;
+            margin-top: 10px;
+            font-size: 0.9em;
+            display: none; /* Escondido por padrão */
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login Administrativo</h2>
+        <form id="loginForm" class="login-form">
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" required>
+
+            <label for="password">Senha:</label>
+            <input type="password" id="password" required>
+
+            <button type="submit">Entrar</button>
+            <p id="errorMessage" class="error-message"></p>
+        </form>
+    </div>
+
+    <!-- SDKs do Firebase Modular (versão 9+) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        // Configuração do Firebase - COLOQUE SEUS VALORES REAIS AQUI
+        // Lembre-se: para produção, usaremos variáveis de ambiente!
+        const firebaseConfig = {
+            apiKey: "AIzaSyApKcOo6okadeurYY0tQzV1KTFx0WoVJLA",
+            authDomain: "gf-frango-assado.firebaseapp.com",
+            databaseURL: "https://gf-frango-assado-default-rtdb.firebaseio.com",
+            projectId: "gf-frango-assado",
+            storageBucket: "gf-frango-assado.firebasestorage.app",
+            messagingSenderId: "651353269015",
+            appId: "1:651353269015:web:3fb1488d45daac6aa90d52",
+            measurementId: "G-BNX9JNGYSD"
+        };
+
+        // Inicializa o Firebase App
+        const app = initializeApp(firebaseConfig);
+        // Obtém a referência ao serviço de autenticação
+        const auth = getAuth(app);
+
+        // Referência aos elementos do formulário
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const errorMessageDisplay = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Impede o envio padrão do formulário
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            try {
+                // Tenta fazer o login com e-mail e senha (sintaxe modular)
+                await signInWithEmailAndPassword(auth, email, password);
+                // Se o login for bem-sucedido, redireciona para a página de administração
+                window.location.href = 'admin.html';
+            } catch (error) {
+                // Exibe mensagens de erro
+                errorMessageDisplay.textContent = 'Erro de login: ' + error.message;
+                errorMessageDisplay.style.display = 'block';
+                console.error("Erro de login:", error);
+            }
+        });
+    </script>
+</body>
+</html>

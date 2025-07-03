@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GF Frango Assado</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap">
+  <style>
+    :root {
+      --roxo: #7d37ff;
+      --azul: #36eaff;
+      --vermelho: #d32f2f;
+      --cinza: #232338;
+      --preto: #181829;
+      --amarelo: #ffe66e;
+    }
+    html, body { margin:0; padding:0; background: var(--preto); font-family: 'Montserrat', Arial, sans-serif; }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 80px;
+      height: 100vh;
+      background: #181829;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 34px;
+      z-index: 50;
+      box-shadow: 2px 0 18px #0005;
+      transition: width .2s;
+    }
+    .sidebar .side-link {
+      width: 100%;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 22px 0 12px 0;
+      text-align: center;
+      font-size: 1.19em;
+      border-left: 5px solid transparent;
+      transition: background .18s, border-color .18s, color .18s;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .sidebar .side-link.active, .sidebar .side-link:hover {
+      background: #232338;
+      color: var(--amarelo, #ffe66e);
+      border-left: 5px solid var(--amarelo, #ffe66e);
+    }
+    .sidebar .side-link i {
+      font-size: 2.6em; /* ÍCONES GRANDES */
+      margin-bottom: 3px;
+      line-height: 1;
+      display: block;
+      text-shadow: 0 4px 18px #0009;
+    }
+    @media (max-width: 700px) {
+      .sidebar { width: 58px; }
+      .sidebar .side-link { font-size: 0.97em; padding: 13px 0 7px 0;}
+      .sidebar .side-link i { font-size: 1.7em; }
+      .main-container, .header-bg, .promocao-dia { margin-left: 58px !important; }
+    }
+    @media (max-width: 500px) {
+      .sidebar { width: 44px; padding-top: 6px;}
+      .sidebar .side-link { font-size: 0.86em; }
+      .sidebar .side-link i { font-size: 1.15em;}
+      .main-container, .header-bg, .promocao-dia { margin-left: 44px !important; }
+    }
+    .header-bg {
+      width: 100vw;
+      min-height: 220px;
+      background: linear-gradient(90deg, var(--vermelho) 0%, var(--roxo) 80%, var(--azul) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-left: 80px;
+    }
+    .logo-central {
+      width: 220px;
+      max-width: 80vw;
+      height: auto;
+      margin-top: 26px;
+      margin-bottom: 0;
+      background: none;
+      display: block;
+      z-index: 3;
+    }
+    .promocao-dia {
+      background: linear-gradient(90deg, var(--roxo) 0%, var(--vermelho) 90%);
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.1em;
+      border-radius: 16px;
+      padding: 1em 2em;
+      margin: 22px auto 12px auto;
+      text-align: center;
+      width: 95vw;
+      max-width: 500px;
+      box-shadow: 0 4px 24px #0002;
+      position: relative;
+      z-index: 2;
+      margin-left: 80px;
+    }
+    .status-bar {
+      background: #232338;
+      color: #fff;
+      padding: 0.7em 1.3em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1em;
+      gap: 1.6em;
+      border-radius: 18px;
+      width: fit-content;
+      margin: -16px auto 16px auto;
+      box-shadow: 0 3px 18px #0003;
+      margin-left: 80px;
+    }
+    .status-aberto { color: #64ff7b; font-weight: bold; }
+    .status-fechado { color: #d32f2f; font-weight: bold; }
+    .main-container {
+      max-width: 500px;
+      margin: 0 auto 60px auto;
+      padding: 12px;
+      margin-left: 80px;
+    }
+    .section-title {
+      font-weight: 700;
+      font-size: 1.2em;
+      color: var(--amarelo);
+      margin: 22px 0 8px 0;
+      letter-spacing: 1px;
+    }
+    .produto-card {
+      background: #232338;
+      border-radius: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 12px 12px 12px 6px;
+      box-shadow: 0 2px 12px #0002;
+    }
+    .produto-img {
+      width: 70px; height: 70px; object-fit: cover;
+      border-radius: 12px; border: 2px solid #fff1;
+      background: #fff;
+    }
+    .produto-info { flex: 1; }
+    .produto-nome { font-weight: bold; color: #fff; font-size: 1.1em; margin-bottom: 4px;}
+    .produto-desc { color: #bbb; font-size: 0.95em; margin-bottom: 6px;}
+    .produto-preco {
+      color: #64ff7b; font-size: 1.2em; font-weight: bold; margin-right: 10px;
+    }
+    .produto-preco-antigo {
+      color: #bbb; font-size: 0.95em; text-decoration: line-through;
+    }
+    .produto-btn {
+      background: var(--vermelho);
+      color: #fff; font-weight: bold;
+      border: none; border-radius: 8px;
+      padding: 8px 18px; font-size: 1em; cursor: pointer;
+      transition: background .22s;
+      margin-top: 8px;
+    }
+    .produto-btn:hover { background: #ad2234; }
+    /* Carrinho (posicione como preferir, só exemplo) */
+    #btn-carrinho {
+      position: fixed;
+      bottom: 30px; right: 40px;
+      background: var(--amarelo);
+      color: #d32f2f;
+      font-size: 2.2em;
+      font-weight: bold;
+      border: none; border-radius: 50px;
+      padding: 16px 33px;
+      cursor: pointer; box-shadow: 0 4px 28px #0004;
+      z-index: 90;
+      display: flex; align-items: center; gap: 10px;
+      transition: transform 0.18s;
+    }
+    #btn-carrinho:hover { transform: scale(1.09);}
+    /* Carrinho modal e popups */
+    .cart-modal-bg {
+      position: fixed; top:0; left:0; width:100vw; height:100vh;
+      background: rgba(10,10,18,0.86);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-modal {
+      background: #fff;
+      border-radius: 22px;
+      max-width: 370px; width: 94vw;
+      padding: 38px 24px 18px 24px;
+      box-shadow: 0 9px 44px #0007;
+      min-height: 160px;
+      position: relative;
+      animation: popIn .5s;
+      color: #232338;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0;}
+      to   { transform: scale(1); opacity: 1;}
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eaeaea;
+      font-size: 1em;
+    }
+    .cart-remove-btn {
+      margin-left: 7px;
+      background: #ffdddd;
+      color: #d32f2f;
+      border: none;
+      border-radius: 4px;
+      padding: 3px 7px;
+      cursor: pointer;
+      font-size: 0.94em;
+      font-weight: bold;
+      transition: background 0.16s;
+    }
+    .cart-remove-btn:hover { background: #ffe66e; }
+    .cart-footer {
+      margin-top: 14px;
+      text-align: right;
+      font-size: 2.15em;
+      font-weight: bold;
+    }
+    .pedido-antigo {
+      background: #ffefef; border-left: 5px solid #d32f2f; padding: 8px 10px 5px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 1em;
+    }
+    @media (max-width: 600px) {
+      .main-container { padding: 7px; }
+      .produto-card { padding: 7px 7px 7px 2px; }
+      .promocao-dia { padding: 0.8em 0.3em; font-size: 1em;}
+      .header-bg { min-height: 130px;}
+      .logo-central { width: 130px;}
+      .section-title { font-size: 1em;}
+      #btn-carrinho { font-size: 1.4em; padding: 9px 19px;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar lateral com ícones grandes -->
+  <div class="sidebar">
+    <a href="#" class="side-link active" id="menu-inicio">
+      <i>🏠</i>
+      <span>Início</span>
+    </a>
+    <a href="#" class="side-link" id="menu-perfil">
+      <i>👤</i>
+      <span>Perfil</span>
+    </a>
+    <a href="#" class="side-link" id="menu-cardapio">
+      <i>🍔</i>
+      <span>Cardápio</span>
+    </a>
+    <a href="#" class="side-link" id="menu-pedidos">
+      <i>⏰</i>
+      <span>Pedidos</span>
+    </a>
+  </div>
+
+  <div class="header-bg">
+    <img src="logo-gf.png" alt="GF Frango Assado" class="logo-central" />
+  </div>
+
+  <div class="promocao-dia">
+    <span>Cupom do Dia: <b>GF10</b> - Use e ganhe 10% de desconto hoje!</span>
+  </div>
+
+  <div class="status-bar">
+    <span id="store-status" class="status-aberto">🟢 Aberto</span> <!-- Adicionado ID para manipulação via JS -->
+    <span>40 a 60min</span>
+    <span>ℹ️ Infos</span>
+  </div>
+
+  <div class="main-container">
+    <!-- Container onde os produtos serão carregados dinamicamente -->
+    <div id="product-listing">
+      <!-- Os produtos serão inseridos aqui pelo JavaScript -->
+      <p>Carregando produtos...</p>
+    </div>
+  </div>
+
+  <!-- Botão carrinho (fixo, grande) -->
+  <button id="btn-carrinho">
+    🛒 <span id="cart-count">0</span>
+  </button>
+
+  <!-- Modal do Carrinho -->
+  <div class="cart-modal-bg" id="cart-modal-bg">
+    <div class="cart-modal">
+      <div id="pedido-antigo"></div>
+      <div id="cart-lista"></div>
+      <div class="cart-footer" id="cart-total"></div>
+      <div style="margin:15px 0;">
+        <input type="text" id="cliente-nome" placeholder="Nome (opcional)" style="width:98%;margin-bottom:7px;"><br>
+        <input type="text" id="cliente-telefone" placeholder="Telefone (opcional)" style="width:98%;margin-bottom:7px;">
+        <select id="modo-entrega" style="width:99%;margin-bottom:7px;">
+          <option value="Retirada">Retirada</option>
+          <option value="Delivery">Delivery (+R$5,00)</option>
+        </select>
+        <input type="text" id="cliente-endereco" placeholder="Endereço (só para delivery)" style="display:none;width:98%;margin-bottom:7px;">
+        <select id="forma-pagamento" style="width:99%;">
+          <option>Dinheiro</option>
+          <option>Cartão</option>
+          <option>Pix</option>
+        </select>
+      </div>
+      <button class="produto-btn" id="whatsapp-button" style="width:100%;margin-top:10px;">Finalizar Pedido via WhatsApp</button>
+      <button class="cart-remove-btn" id="close-cart" style="width:100%;margin-top:5px;background:#eee;color:#232338;">Fechar</button>
+    </div>
+  </div>
+
+  <!-- POPUP CUPOM -->
+  <div id="popup-cupom-bg" class="cupom-popup-bg" style="display:none">
+    <div class="cupom-popup">
+      <div class="cupom-popup-title">🎁 Cupom Especial para Você</div>
+      <div class="cupom-popup-desc">
+        Use o cupom abaixo ao finalizar seu pedido e ganhe <b>10% de desconto</b> hoje!
+      </div>
+      <span class="cupom-codigo">GF10</span>
+      <br>
+      <button class="cupom-popup-fechar" onclick="fecharPopupCupom()">Fechar</button>
+    </div>
+  </div>
+  <!-- Carrega o script principal do Firebase e o seu script.js -->
+  <script src="script.js" type="module"></script>
+</body>
+</html>

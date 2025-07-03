@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - GF Frango Assado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; background: #181829; color: #fff; margin: 0; padding: 0;}
+    .admin-container { max-width: 500px; margin: 35px auto; padding: 30px; background: #232338; border-radius: 18px; box-shadow: 0 5px 26px #0007;}
+    h1 { text-align: center; margin-bottom: 22px;}
+    label { display: block; margin-top: 13px; color: #ffe66e; font-weight: bold;}
+    input, select, textarea { width: 100%; padding: 9px; margin-top: 4px; border-radius: 6px; border: 1.5px solid #7d37ff33; font-size: 1em; margin-bottom: 8px;}
+    .btn { background: #7d37ff; color: #fff; font-weight: bold; border: none; border-radius: 8px; padding: 13px 0; font-size: 1.1em; width: 100%; cursor: pointer; transition: background .1s;}
+    .btn-save { background: #4CAF50; } /* Verde para Salvar */
+    .btn-edit { background: #2196F3; } /* Azul para Editar */
+    .btn-delete { background: #f44336; } /* Vermelho para Excluir */
+    .btn-reset { background: #ff9800; } /* Laranja para Resetar */
+    .btn:hover { opacity: 0.9; }
+    .product-list { margin-top: 30px;}
+    .product-item { background: #2e2e4a; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+    .product-details { flex-grow: 1; text-align: left;}
+    .product-item button { margin-left: 10px; padding: 8px 12px; border-radius: 5px; cursor: pointer; border: none; font-weight: bold;}
+    .product-name { font-size: 1.2em; color: #ffe66e;}
+    .product-category, .product-price { font-size: 0.9em; color: #bbb;}
+    .logout-btn { background: #d32f2f; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; float: right;} /* Estilo para o botão de Logout */
+
+    /* Estilos para o overlay de carregamento */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      color: white;
+      font-size: 2em;
+    }
+    .config-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #3a3a5a;
+    }
+    .config-section h2 {
+      color: var(--amarelo);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .config-section .time-inputs {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .config-section .time-inputs input[type="time"] {
+      width: calc(50% - 5px); /* Ajuste para dois campos lado a lado com gap */
+      margin-right: 0; /* Remove margin-right extra */
+    }
+    .config-section .btn {
+      margin-top: 15px;
+    }
+    .manual-status-controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+    .manual-status-controls input[type="radio"] {
+      width: auto;
+      margin-right: 5px;
+    }
+    .manual-status-controls label {
+      display: inline-block;
+      margin-top: 0;
+      font-weight: normal;
+      color: #fff;
+    }
+    .manual-status-controls button {
+      width: auto;
+      padding: 8px 15px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay de carregamento, visível enquanto verifica a autenticação -->
+  <div id="loadingOverlay" class="loading-overlay">
+    Carregando...
+  </div>
+
+  <div class="admin-container" style="display:none;">
+    <h1>Administração de Produtos</h1>
+
+    <!-- Botão de Logout -->
+    <button id="logoutBtn" class="logout-btn">Sair</button>
+
+    <form id="productForm">
+      <input type="hidden" id="produto-id">
+      
+      <label for="produto-nome">Nome do Produto:</label>
+      <input type="text" id="produto-nome" required>
+
+      <label for="produto-desc">Descrição:</label>
+      <textarea id="produto-desc"></textarea>
+
+      <label for="produto-preco">Preço:</label>
+      <input type="number" id="produto-preco" step="0.01" required>
+
+      <label for="produto-categoria">Categoria:</label>
+      <select id="produto-categoria" required>
+        <option value="frango">Frango Assado</option>
+        <option value="acompanhamentos">Acompanhamentos</option>
+        <option value="bebidas">Bebidas</option>
+        <!-- Adicione mais categorias conforme necessário -->
+      </select>
+
+      <label for="produto-img">URL da Imagem (opcional):</label>
+      <input type="url" id="produto-img">
+
+      <button type="submit" class="btn btn-save">Salvar Produto</button>
+      <button type="button" class="btn btn-reset" id="reset-form-btn">Limpar Formulário</button>
+    </form>
+
+    <div class="product-list" id="lista-produtos">
+      <!-- Produtos serão listados aqui -->
+    </div>
+
+    <!-- Seção de Configuração de Horário de Funcionamento -->
+    <div class="config-section">
+      <h2>Horários de Funcionamento</h2>
+      <form id="storeHoursForm">
+        <h3>Dias de Semana (Segunda a Quinta)</h3>
+        <div class="time-inputs">
+          <label for="weekday-open-time">Abertura:</label>
+          <input type="time" id="weekday-open-time" value="09:00">
+          <label for="weekday-close-time">Fechamento:</label>
+          <input type="time" id="weekday-close-time" value="22:00">
+        </div>
+
+        <h3>Horários Específicos</h3>
+
+        <h4>Sexta-feira</h4>
+        <div class="time-inputs">
+          <label for="friday-open-time">Abertura:</label>
+          <input type="time" id="friday-open-time" value="09:00">
+          <label for="friday-close-time">Fechamento:</label>
+          <input type="time" id="friday-close-time" value="14:00">
+        </div>
+
+        <h4>Sábado</h4>
+        <div class="time-inputs">
+          <label for="saturday-open-time">Abertura:</label>
+          <input type="time" id="saturday-open-time" value="09:00">
+          <label for="saturday-close-time">Fechamento:</label>
+          <input type="time" id="saturday-close-time" value="16:00">
+        </div>
+
+        <h4>Domingo</h4>
+        <div class="time-inputs">
+          <label for="sunday-open-time">Abertura:</label>
+          <input type="time" id="sunday-open-time" value="09:00">
+          <label for="sunday-close-time">Fechamento:</label>
+          <input type="time" id="sunday-close-time" value="14:00">
+        </div>
+
+        <button type="submit" class="btn btn-save">Salvar Horários Programados</button>
+      </form>
+
+      <hr style="border-color: #3a3a5a; margin: 30px 0;">
+
+      <h2>Controle Manual de Status</h2>
+      <form id="manualStatusForm">
+        <div class="manual-status-controls">
+          <input type="radio" id="manual-open" name="manual-status" value="open">
+          <label for="manual-open">Aberto</label>
+
+          <input type="radio" id="manual-closed" name="manual-status" value="closed">
+          <label for="manual-closed">Fechado</label>
+
+          <input type="checkbox" id="manual-override-active">
+          <label for="manual-override-active">Ativar Controle Manual</label>
+        </div>
+        <button type="submit" class="btn btn-save">Salvar Status Manual</button>
+      </form>
+    </div>
+
+  </div>
+
+  <script type="module">
+    // Importa as funções necessárias do SDK Modular do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, set, remove, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    // Configuração do Firebase - COLOQUE SEUS VALORES REAIS AQUI
+    // Lembre-se: para produção, usaremos variáveis de ambiente!
+    const firebaseConfig = {
+      apiKey: "AIzaSyApKcOo6okadeurYY0tQzV1KTFx0WoVJLA",
+      authDomain: "gf-frango-assado.firebaseapp.com",
+      databaseURL: "https://gf-frango-assado-default-rtdb.firebaseio.com",
+      projectId: "gf-frango-assado",
+      storageBucket: "gf-frango-assado.firebasestorage.app",
+      messagingSenderId: "651353269015",
+      appId: "1:651353269015:web:3fb1488d45daac6aa90d52",
+      measurementId: "G-BNX9JNGYSD"
+    };
+
+    // Inicializa o Firebase App
+    const app = initializeApp(firebaseConfig);
+    // Obtém a referência aos serviços de autenticação e banco de dados
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Referência ao container principal e overlay de carregamento
+    const adminContainer = document.querySelector('.admin-container');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // ==========================================================
+    // LÓGICA DE AUTENTICAÇÃO
+    // ==========================================================
+    onAuthStateChanged(auth, function(user) {
+      if (user) {
+        // Usuário logado
+        console.log("Usuário logado:", user.email);
+        loadingOverlay.style.display = 'none'; // Esconde o overlay de carregamento
+        adminContainer.style.display = 'block'; // Mostra o conteúdo da administração
+        renderProdutos(); // Renderiza os produtos uma vez que o usuário está logado
+        loadStoreHours(); // Carrega os horários de funcionamento programados
+        loadManualStatus(); // Carrega o status manual
+      } else {
+        // Usuário não logado, redireciona para a página de login
+        console.log("Usuário não logado. Redirecionando para login.html");
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Botão de Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        // Redireciona para a página de login após o logout
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error("Erro ao fazer logout:", error);
+        alert("Erro ao fazer logout. Tente novamente.");
+      });
+    });
+
+    // ==========================================================
+    // FUNÇÕES EXISTENTES DE CRUD DE PRODUTOS (MANTIDAS E ADAPTADAS)
+    // ==========================================================
+
+    const productForm = document.getElementById('productForm');
+    const listaProdutosDiv = document.getElementById('lista-produtos');
+
+    // Renderiza produtos do Firebase
+    function renderProdutos() {
+      onValue(ref(db, 'produtos'), (snapshot) => {
+        listaProdutosDiv.innerHTML = ''; // Limpa a lista
+        snapshot.forEach((childSnapshot) => {
+          const key = childSnapshot.key;
+          const produto = childSnapshot.val();
+
+          const productItem = document.createElement('div');
+          productItem.className = 'product-item';
+          productItem.innerHTML = `
+            <div class="product-details">
+              <div class="product-name">${produto.nome}</div>
+              <div class="product-category">${produto.categoria}</div>
+              <div class="product-price">${Number(produto.preco).toFixed(2).replace('.', ',')}</div>
+            </div>
+            <div class="product-actions">
+              <button class="btn-edit" data-id="${key}">Editar</button>
+              <button class="btn-delete" data-id="${key}">Excluir</button>
+            </div>
+          `;
+          listaProdutosDiv.appendChild(productItem);
+        });
+
+        // Adiciona event listeners aos botões de Editar e Excluir APÓS A RENDERIZAÇÃO
+        document.querySelectorAll('.btn-edit').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const productId = e.target.getAttribute('data-id');
+            editProduto(productId);
+          });
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const productId = e.target.getAttribute('data-id');
+            deleteProduto(productId);
+          });
+        });
+      });
+    }
+
+    // Salvar/Editar Produto
+    productForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('produto-id').value;
+      const produto = {
+        nome: document.getElementById('produto-nome').value,
+        desc: document.getElementById('produto-desc').value,
+        preco: parseFloat(document.getElementById('produto-preco').value),
+        categoria: document.getElementById('produto-categoria').value,
+        imgurl: document.getElementById('produto-img').value
+      };
+
+      try {
+        if (id) {
+          await set(ref(db, 'produtos/' + id), produto);
+        } else {
+          await push(ref(db, 'produtos'), produto);
+        }
+        // renderProdutos() será chamado automaticamente pelo onValue listener
+      } catch (err) {
+        console.error("Erro ao salvar/cadastrar produto:", err);
+        alert('Erro ao salvar/cadastrar!');
+      }
+      resetForm();
+    };
+
+    // Editar produto
+    async function editProduto(id) {
+      try {
+        const snapshot = await get(ref(db, 'produtos/' + id));
+        if (snapshot.exists()) {
+          const p = snapshot.val();
+          document.getElementById('produto-id').value = id;
+          document.getElementById('produto-nome').value = p.nome;
+          document.getElementById('produto-desc').value = p.desc || '';
+          document.getElementById('produto-preco').value = Number(p.preco).toFixed(2);
+          document.getElementById('produto-categoria').value = p.categoria;
+          document.getElementById('produto-img').value = p.imgurl || '';
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        } else {
+          console.log("Produto não encontrado.");
+        }
+      } catch (error) {
+        console.error("Erro ao buscar produto para edição:", error);
+        alert("Erro ao carregar produto para edição.");
+      }
+    }
+
+    // Excluir produto
+    async function deleteProduto(id) {
+      showCustomConfirm('Deseja realmente excluir este produto?', async () => {
+        try {
+          await remove(ref(db, 'produtos/' + id));
+          // renderProdutos() será chamado automaticamente pelo onValue listener
+        } catch (err) {
+          console.error("Erro ao excluir produto:", err);
+          alert('Erro ao excluir!');
+        }
+      });
+    }
+
+    function resetForm() {
+      document.getElementById('produto-id').value = '';
+      document.getElementById('produto-nome').value = '';
+      document.getElementById('produto-desc').value = '';
+      document.getElementById('produto-preco').value = '';
+      document.getElementById('produto-categoria').value = 'frango';
+      document.getElementById('produto-img').value = '';
+    }
+
+    // Listener para o botão de resetar formulário
+    document.getElementById('reset-form-btn').addEventListener('click', resetForm);
+
+    // ==========================================================
+    // FUNÇÕES DE CONFIGURAÇÃO DE HORÁRIO DE FUNCIONAMENTO PROGRAMADO
+    // ==========================================================
+    const storeHoursForm = document.getElementById('storeHoursForm');
+    const weekdayOpenTimeInput = document.getElementById('weekday-open-time');
+    const weekdayCloseTimeInput = document.getElementById('weekday-close-time');
+    const fridayOpenTimeInput = document.getElementById('friday-open-time');
+    const fridayCloseTimeInput = document.getElementById('friday-close-time');
+    const saturdayOpenTimeInput = document.getElementById('saturday-open-time');
+    const saturdayCloseTimeInput = document.getElementById('saturday-close-time');
+    const sundayOpenTimeInput = document.getElementById('sunday-open-time');
+    const sundayCloseTimeInput = document.getElementById('sunday-close-time');
+
+    // Carrega os horários de funcionamento programados do Firebase
+    function loadStoreHours() {
+      onValue(ref(db, 'config/storeHours'), (snapshot) => {
+        const hours = snapshot.val();
+        if (hours) {
+          weekdayOpenTimeInput.value = hours.weekday?.openTime || '09:00';
+          weekdayCloseTimeInput.value = hours.weekday?.closeTime || '22:00';
+          fridayOpenTimeInput.value = hours.friday?.openTime || '09:00';
+          fridayCloseTimeInput.value = hours.friday?.closeTime || '14:00';
+          saturdayOpenTimeInput.value = hours.saturday?.openTime || '09:00';
+          saturdayCloseTimeInput.value = hours.saturday?.closeTime || '16:00';
+          sundayOpenTimeInput.value = hours.sunday?.openTime || '09:00';
+          sundayCloseTimeInput.value = hours.sunday?.closeTime || '14:00';
+        } else {
+          weekdayOpenTimeInput.value = '09:00';
+          weekdayCloseTimeInput.value = '22:00';
+          fridayOpenTimeInput.value = '09:00';
+          fridayCloseTimeInput.value = '14:00';
+          saturdayOpenTimeInput.value = '09:00';
+          saturdayCloseTimeInput.value = '16:00';
+          sundayOpenTimeInput.value = '09:00';
+          sundayCloseTimeInput.value = '14:00';
+        }
+      }, (error) => {
+        console.error("Erro ao carregar horários de funcionamento programados:", error);
+      });
+    }
+
+    // Salva os horários de funcionamento programados no Firebase
+    storeHoursForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const storeHoursData = {
+        weekday: {
+          openTime: weekdayOpenTimeInput.value,
+          closeTime: weekdayCloseTimeInput.value
+        },
+        friday: {
+          openTime: fridayOpenTimeInput.value,
+          closeTime: fridayCloseTimeInput.value
+        },
+        saturday: {
+          openTime: saturdayOpenTimeInput.value,
+          closeTime: saturdayCloseTimeInput.value
+        },
+        sunday: {
+          openTime: sundayOpenTimeInput.value,
+          closeTime: sundayCloseTimeInput.value
+        }
+      };
+
+      try {
+        await set(ref(db, 'config/storeHours'), storeHoursData);
+        alert('Horários de funcionamento programados salvos com sucesso!');
+      } catch (error) {
+        console.error("Erro ao salvar horários de funcionamento programados:", error);
+        alert('Erro ao salvar horários de funcionamento programados. Tente novamente.');
+      }
+    };
+
+    // ==========================================================
+    // FUNÇÕES DE CONTROLE MANUAL DE STATUS
+    // ==========================================================
+    const manualStatusForm = document.getElementById('manualStatusForm');
+    const manualOpenRadio = document.getElementById('manual-open');
+    const manualClosedRadio = document.getElementById('manual-closed');
+    const manualOverrideActiveCheckbox = document.getElementById('manual-override-active');
+
+    // Carrega o status manual do Firebase
+    function loadManualStatus() {
+      onValue(ref(db, 'config/manualStatus'), (snapshot) => {
+        const manualStatus = snapshot.val();
+        if (manualStatus) {
+          manualOverrideActiveCheckbox.checked = manualStatus.active || false;
+          if (manualStatus.isOpen) {
+            manualOpenRadio.checked = true;
+          } else {
+            manualClosedRadio.checked = true;
+          }
+        } else {
+          // Define valores padrão se não houver configuração manual
+          manualOverrideActiveCheckbox.checked = false;
+          manualOpenRadio.checked = true; // Assume 'Aberto' como padrão se não houver override
+        }
+      }, (error) => {
+        console.error("Erro ao carregar status manual:", error);
+      });
+    }
+
+    // Salva o status manual no Firebase
+    manualStatusForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const manualStatusData = {
+        active: manualOverrideActiveCheckbox.checked,
+        isOpen: manualOpenRadio.checked // true se 'Aberto', false se 'Fechado'
+      };
+
+      try {
+        await set(ref(db, 'config/manualStatus'), manualStatusData);
+        alert('Status manual salvo com sucesso!');
+      } catch (error) {
+        console.error("Erro ao salvar status manual:", error);
+        alert('Erro ao salvar status manual. Tente novamente.');
+      }
+    };
+
+
+    // ==========================================================
+    // FUNÇÕES DE MODAL CUSTOMIZADA (Substitui alert/confirm)
+    // ==========================================================
+    function showCustomConfirm(message, onConfirm) {
+      const modalHtml = `
+        <div id="customConfirmModal" style="
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center;
+          align-items: center; z-index: 1001;
+        ">
+          <div style="
+            background: #232338; padding: 25px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); text-align: center;
+            color: #fff; max-width: 350px; width: 90%;
+          ">
+            <p style="margin-bottom: 20px; font-size: 1.1em;">${message}</p>
+            <button id="confirmYes" style="
+              background: #4CAF50; color: white; padding: 10px 20px;
+              border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;
+            ">Sim</button>
+            <button id="confirmNo" style="
+              background: #f44336; color: white; padding: 10px 20px;
+              border: none; border-radius: 5px; cursor: pointer;
+            ">Não</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      document.getElementById('confirmYes').onclick = () => {
+        onConfirm();
+        document.getElementById('customConfirmModal').remove();
+      };
+      document.getElementById('confirmNo').onclick = () => {
+        document.getElementById('customConfirmModal').remove();
+      };
+    }
+  </script>
+</body>
+</html>
