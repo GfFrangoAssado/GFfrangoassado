@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - GF Frango Assado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --roxo: #7d37ff;
+            --azul: #36eaff;
+            --vermelho: #d32f2f;
+            --cinza: #232338;
+            --preto: #181829;
+            --amarelo: #ffe66e;
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: var(--preto); 
+            color: #fff; 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+        }
+        
+        /* Estilos do Sidebar (adaptados do index.html) */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 100vh;
+            background: #181829;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 34px;
+            z-index: 50;
+            box-shadow: 2px 0 18px #0005;
+            transition: width .2s;
+            overflow-y: auto; /* Adiciona rolagem vertical se o conteúdo exceder a altura */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        /* Oculta a barra de rolagem para navegadores WebKit (Chrome, Safari) */
+        .sidebar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sidebar .side-link {
+            width: 100%;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 22px 0 12px 0;
+            text-align: center;
+            font-size: 1.19em;
+            border-left: 5px solid transparent;
+            transition: background .18s, border-color .18s, color .18s;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .sidebar .side-link.active, .sidebar .side-link:hover {
+            background: #232338;
+            color: var(--amarelo, #ffe66e);
+            border-left: 5px solid var(--amarelo, #ffe66e);
+        }
+        .sidebar .side-link i {
+            font-size: 2.6em; /* Ícones grandes */
+            margin-bottom: 3px;
+            line-height: 1;
+            display: block;
+            text-shadow: 0 4px 18px #0009;
+        }
+        @media (max-width: 700px) {
+            .sidebar { width: 58px; }
+            .sidebar .side-link { font-size: 0.97em; padding: 13px 0 7px 0;}
+            .sidebar .side-link i { font-size: 1.7em; }
+        }
+        @media (max-width: 500px) {
+            .sidebar { width: 44px; padding-top: 6px;}
+            .sidebar .side-link { font-size: 0.86em; }
+            .sidebar .side-link i { font-size: 1.15em;}
+        }
+
+        /* Estilos do Conteúdo Principal do Admin */
+        .main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+            margin-left: 80px; /* Espaço para o sidebar */
+            padding: 20px;
+            padding-top: 35px; /* Ajuste para não ficar colado no topo */
+            max-width: calc(100% - 80px); /* Garante que não ultrapasse a largura da tela */
+            box-sizing: border-box; /* Inclui padding na largura */
+            display: none; /* Esconde o conteúdo principal por padrão */
+        }
+        @media (max-width: 700px) {
+            .main-content { margin-left: 58px; max-width: calc(100% - 58px); }
+        }
+        @media (max-width: 500px) {
+            .main-content { margin-left: 44px; max-width: calc(100% - 44px); }
+        }
+
+        .admin-section {
+            max-width: 500px;
+            margin: 0 auto 30px auto; /* Centraliza e adiciona margem inferior */
+            padding: 30px;
+            background: #232338;
+            border-radius: 18px;
+            box-shadow: 0 5px 26px #0007;
+            display: none; /* Todas as seções começam escondidas */
+        }
+        .admin-section.active {
+            display: block; /* Seção ativa é mostrada */
+        }
+
+        h1, h2 { text-align: center; margin-bottom: 22px; color: #ffe66e;}
+        label { display: block; margin-top: 13px; color: #ffe66e; font-weight: bold;}
+        input, select, textarea { 
+            width: 100%; 
+            padding: 9px; 
+            margin-top: 4px; 
+            border-radius: 6px; 
+            border: 1.5px solid #7d37ff33; 
+            background-color: #181829; /* Fundo escuro */
+            color: #fff; /* Texto branco */
+            font-size: 1em; 
+            margin-bottom: 8px;
+            box-sizing: border-box; /* Garante que padding não aumente a largura */
+        }
+        input::placeholder, textarea::placeholder {
+            color: #bbb; /* Cor do placeholder */
+        }
+
+        .btn { 
+            background: #7d37ff; 
+            color: #fff; 
+            font-weight: bold; 
+            border: none; 
+            border-radius: 8px; 
+            padding: 13px 0; 
+            font-size: 1.1em; 
+            width: 100%; 
+            cursor: pointer; 
+            transition: background .1s;
+            margin-top: 15px; /* Espaço acima dos botões */
+        }
+        .btn-save { background: #4CAF50; } /* Verde para Salvar */
+        .btn-edit { background: #2196F3; } /* Azul para Editar */
+        .btn-delete { background: #f44336; } /* Vermelho para Excluir */
+        .btn-reset { background: #ff9800; } /* Laranja para Resetar */
+        .btn:hover { opacity: 0.9; }
+        .product-list { margin-top: 30px;}
+        .product-item { 
+            background: #2e2e4a; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .product-details { flex-grow: 1; text-align: left;}
+        .product-item button { margin-left: 10px; padding: 8px 12px; border-radius: 5px; cursor: pointer; border: none; font-weight: bold; font-size: 0.9em;}
+        .product-name { font-size: 1.2em; color: #ffe66e;}
+        .product-category, .product-price { font-size: 0.9em; color: #bbb;}
+        .logout-btn { 
+            background: #d32f2f; 
+            color: white; 
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            width: 80%; /* Ajustado para o sidebar */
+            margin-left: auto; /* Centraliza no sidebar */
+            margin-right: auto; /* Centraliza no sidebar */
+            display: block; /* Para aplicar width e margin auto */
+            flex-shrink: 0; /* Impede que o botão encolha */
+        } 
+
+        /* Estilos para o overlay de carregamento */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            font-size: 2em;
+        }
+        .config-section h2 {
+            color: var(--amarelo);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .config-section .time-inputs {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .config-section .time-inputs input[type="time"] {
+            width: calc(50% - 5px);
+            margin-right: 0;
+        }
+        .config-section .btn {
+            margin-top: 15px;
+        }
+        .manual-status-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .manual-status-controls input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        .manual-status-controls label {
+            display: inline-block;
+            margin-top: 0;
+            font-weight: normal;
+            color: #fff;
+        }
+        .manual-status-controls button {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+        /* Estilos para a lista de categorias */
+        .category-item {
+            background: #2e2e4a;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .category-item button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        /* Estilos para rolagem interna nas listas do admin */
+        .product-list, .category-list, .order-list, .report-list, .loyalty-customer-list { /* Adicionado .loyalty-customer-list */
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .product-list::-webkit-scrollbar, .category-list::-webkit-scrollbar, .order-list::-webkit-scrollbar, .report-list::-webkit-scrollbar, .loyalty-customer-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .product-list::-webkit-scrollbar-track, .category-list::-webkit-scrollbar-track, .order-list::-webkit-scrollbar-track, .report-list::-webkit-scrollbar-track, .loyalty-customer-list::-webkit-scrollbar-track {
+            background: #2e2e4a;
+            border-radius: 10px;
+        }
+        .product-list::-webkit-scrollbar-thumb, .category-list::-webkit-scrollbar-thumb, .order-list::-webkit-scrollbar-thumb, .report-list::-webkit-scrollbar-thumb, .loyalty-customer-list::-webkit-scrollbar-thumb {
+            background: var(--roxo);
+            border-radius: 10px;
+        }
+        .product-list::-webkit-scrollbar-thumb:hover, .category-list::-webkit-scrollbar-thumb:hover, .order-list::-webkit-scrollbar-thumb:hover, .report-list::-webkit-scrollbar-thumb:hover, .loyalty-customer-list::-webkit-scrollbar-thumb:hover {
+            background: var(--vermelho);
+        }
+        /* Estilo para o campo de Preço Antigo */
+        input#produto-preco-antigo {
+            margin-bottom: 8px; /* Adiciona margem inferior para separar do próximo campo */
+        }
+        /* Estilos para os itens de pedido */
+        .order-item {
+            background: #2e2e4a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            color: #fff;
+        }
+        .order-item h3 {
+            color: var(--amarelo);
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .order-item p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #bbb;
+        }
+        .order-item ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+            border-top: 1px solid #3a3a5a;
+            padding-top: 10px;
+        }
+        .order-item li {
+            margin-bottom: 3px;
+            color: #ccc;
+        }
+        .order-actions {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas pequenas */
+            gap: 8px;
+            margin-top: 15px;
+            justify-content: flex-end; /* Alinha os botões à direita */
+        }
+        .order-actions button, .order-actions select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9em;
+            flex-shrink: 0; /* Evita que os elementos encolham demais */
+        }
+        .order-actions select {
+            background-color: #181829;
+            color: #fff;
+            border: 1px solid #7d37ff33;
+            min-width: 120px; /* Garante largura mínima para o select */
+        }
+        .order-actions select option {
+            background-color: #181829;
+            color: #fff;
+        }
+        /* Cores para os status */
+        .status-pendente { color: #ff9800; } /* Laranja */
+        .status-preparando { color: #2196F3; } /* Azul */
+        .status-entregue { color: #4CAF50; } /* Verde */
+        .status-cancelado { color: #f44336; } /* Vermelho */
+
+        /* Estilos para a seção de relatórios */
+        .reports-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .report-card {
+            background: #2e2e4a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .report-card h3 {
+            color: #ffe66e;
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+        .report-card p {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #64ff7b; /* Verde para valores positivos */
+            margin: 10px 0 0 0;
+        }
+        .report-card.negative p {
+            color: #f44336; /* Vermelho para valores negativos, se aplicável */
+        }
+        .most-ordered-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        .most-ordered-list li {
+            background: #181829;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95em;
+            color: #ccc;
+        }
+        .most-ordered-list li span:first-child {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Estilos para a seção de clientes fidelidade */
+        .loyalty-customer-item {
+            background: #2e2e4a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            color: #fff;
+        }
+        .loyalty-customer-item h3 {
+            color: var(--amarelo);
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .loyalty-customer-item p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #bbb;
+        }
+        .loyalty-customer-item .customer-actions {
+            margin-top: 10px;
+            text-align: right;
+        }
+        .loyalty-customer-item .customer-actions button {
+            background: var(--roxo);
+            color: #fff;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: background .1s;
+        }
+        .loyalty-customer-item .customer-actions button:hover {
+            opacity: 0.9;
+        }
+
+        /* Estilos para o botão de ativar som (removido) */
+        #enable-sound-prompt {
+            display: none; 
+        }
+
+        /* Estilos para o Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            background: #2e2e4a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-align: center;
+            cursor: pointer; /* Torna o card clicável */
+            transition: transform 0.1s ease-in-out;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px); /* Efeito de hover */
+        }
+        .dashboard-card h3 {
+            color: #ffe66e;
+            margin-top: 0;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .dashboard-card p {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #64ff7b; /* Verde para valores positivos */
+            margin: 0;
+        }
+        /* Cores específicas para os status no dashboard */
+        .dashboard-card.pendente p { color: #ff9800; }
+        .dashboard-card.preparando p { color: #2196F3; }
+        .dashboard-card.entregue p { color: #4CAF50; }
+        .dashboard-card.cancelado p { color: #f44336; }
+        .dashboard-card.vendas p { color: #64ff7b; } /* Vendas sempre verde */
+
+        .dashboard-chart-container {
+            background: #2e2e4a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-align: center;
+            margin-top: 20px;
+            /* Definindo uma altura fixa para o contêiner do gráfico */
+            height: 350px; /* Altura fixa para o contêiner */
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .dashboard-chart-container h3 {
+            color: #ffe66e;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        /* Estilo para o canvas do gráfico */
+        #orders-chart {
+            max-width: 100%;
+            height: 100%; /* Ocupa 100% da altura do contêiner */
+            display: block; 
+            margin: 0 auto;
+            /* Removido width/height fixos aqui, Chart.js e CSS cuidam */
+        }
+
+        /* Estilos para os filtros de relatório */
+        .report-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .report-filters button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            background: var(--roxo);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .report-filters button:hover, .report-filters button.active {
+            background: var(--amarelo);
+            color: var(--preto);
+        }
+        .report-filters input[type="date"] {
+            width: auto;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1.5px solid #7d37ff33;
+            background-color: #181829;
+            color: #fff;
+            font-size: 1em;
+        }
+        .report-details-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        .report-details-list li {
+            background: #2e2e4a;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column; /* Para empilhar os detalhes */
+            align-items: flex-start; /* Alinhar à esquerda */
+            font-size: 0.95em;
+            color: #ccc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .report-details-list li span {
+            margin-bottom: 3px;
+        }
+        .report-details-list li span:first-child {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Estilos para o Modal de Pedidos Filtrados */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1002; /* Maior que o overlay de carregamento */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #232338;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            color: #fff;
+            max-width: 90%;
+            width: 500px; /* Largura padrão do modal */
+            max-height: 80vh; /* Altura máxima para rolagem */
+            overflow-y: auto; /* Adiciona rolagem se o conteúdo for muito grande */
+            position: relative;
+        }
+        .modal-content h2 {
+            color: var(--amarelo);
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .modal-content .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+        .modal-content .close-button:hover {
+            color: var(--vermelho);
+        }
+        .modal-content .order-list { /* Reutiliza estilos da lista de pedidos */
+            max-height: none; /* Permite que o modal controle a rolagem */
+            box-shadow: none; /* Remove sombra interna */
+            padding-right: 0; /* Remove padding extra da rolagem */
+        }
+
+        /* Estilos para a barra de busca e filtro de pedidos */
+        .order-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        .order-controls input[type="search"],
+        .order-controls select {
+            flex-grow: 1; /* Permite que ocupem o espaço disponível */
+            max-width: 100%; /* Garante que não ultrapassem o contêiner */
+            padding: 10px;
+            border-radius: 8px;
+            border: 1.5px solid #7d37ff33;
+            background-color: #181829;
+            color: #fff;
+            font-size: 1em;
+        }
+        .order-controls select {
+            min-width: 150px; /* Largura mínima para o select */
+        }
+
+        /* Estilos para a paginação */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #3a3a5a;
+        }
+        .pagination-controls button {
+            background: var(--roxo);
+            color: #fff;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            background: var(--amarelo);
+            color: var(--preto);
+        }
+        .pagination-controls button:disabled {
+            background: #3a3a5a;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .pagination-controls span {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Estilos para o preview da imagem de upload */
+        #image-preview-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+        #image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            border: 1px solid #7d37ff33;
+            object-fit: cover;
+            display: none; /* Escondido por padrão */
+        }
+        #upload-progress {
+            width: 100%;
+            height: 10px;
+            background-color: #3a3a5a;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none; /* Escondido por padrão */
+        }
+        #upload-progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--amarelo);
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay de carregamento, visível enquanto verifica a autenticação -->
+    <div id="loadingOverlay" class="loading-overlay">
+        Carregando...
+    </div>
+
+    <!-- Sidebar lateral -->
+    <div class="sidebar">
+        <a href="#" class="side-link active" id="menu-dashboard" data-section="dashboard-section">
+            <i>🏠</i>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="side-link" id="menu-produtos" data-section="produtos-section">
+            <i>🍔</i>
+            <span>Produtos</span>
+        </a>
+        <a href="#" class="side-link" id="menu-horarios" data-section="horarios-section">
+            <i>⏰</i>
+            <span>Horários</span>
+        </a>
+        <a href="#" class="side-link" id="menu-status" data-section="status-manual-section">
+            <i>💡</i>
+            <span>Status</span>
+        </a>
+        <a href="#" class="side-link" id="menu-categorias" data-section="categorias-section">
+            <i>🏷️</i>
+            <span>Categorias</span>
+        </a>
+        <a href="#" class="side-link" id="menu-pedidos" data-section="pedidos-section">
+            <i>📋</i>
+            <span>Pedidos</span>
+        </a>
+        <a href="#" class="side-link" id="menu-relatorios" data-section="relatorios-section">
+            <i>📊</i>
+            <span>Relatórios</span>
+        </a>
+        <a href="#" class="side-link" id="menu-clientes-fidelidade" data-section="clientes-fidelidade-section">
+            <i>⭐</i>
+            <span>Fidelidade</span>
+        </a>
+        <button id="logoutBtn" class="logout-btn" style="margin-top: auto; margin-bottom: 20px; width: 80%;">Sair</button>
+    </div>
+
+    <!-- Conteúdo principal do Admin -->
+    <div class="main-content">
+
+        <!-- Seção: Dashboard de Visão Geral -->
+        <div id="dashboard-section" class="admin-section active">
+            <h1>Dashboard</h1>
+            <div class="dashboard-grid">
+                <div class="dashboard-card pendente" data-status-filter="Pendente">
+                    <h3>Pedidos Pendentes</h3>
+                    <p id="dashboard-pendente">0</p>
+                </div>
+                <div class="dashboard-card preparando" data-status-filter="Preparando">
+                    <h3>Pedidos Preparando</h3>
+                    <p id="dashboard-preparando">0</p>
+                </div>
+                <div class="dashboard-card entregue" data-status-filter="Entregue">
+                    <h3>Pedidos Entregues</h3>
+                    <p id="dashboard-entregue">0</p>
+                </div>
+                <div class="dashboard-card cancelado" data-status-filter="Cancelado">
+                    <h3>Pedidos Cancelados</h3>
+                    <p id="dashboard-cancelado">0</p>
+                </div>
+                <div class="dashboard-card vendas">
+                    <h3>Vendas do Dia</h3>
+                    <p id="dashboard-vendas-dia">R$ 0,00</p>
+                </div>
+            </div>
+            <div class="dashboard-chart-container">
+                <h3>Pedidos por Status</h3>
+                <!-- Removido width/height do canvas, agora controlado por CSS e Chart.js -->
+                <canvas id="orders-chart"></canvas> 
+            </div>
+        </div>
+
+        <!-- Seção: Administração de Produtos -->
+        <div id="produtos-section" class="admin-section">
+            <h1>Administração de Produtos</h1>
+            <form id="productForm">
+                <input type="hidden" id="produto-id">
+                
+                <label for="produto-nome">Nome do Produto:</label>
+                <input type="text" id="produto-nome" required>
+
+                <label for="produto-desc">Descrição:</label>
+                <textarea id="produto-desc"></textarea>
+
+                <label for="produto-preco">Preço:</label>
+                <input type="number" id="produto-preco" step="0.01" required>
+
+                <label for="produto-preco-antigo">Preço Antigo (opcional, para promoção):</label>
+                <input type="number" id="produto-preco-antigo" step="0.01">
+
+                <!-- NOVO: Campo de upload de arquivo para imagem -->
+                <label for="produto-img-upload">Upload da Imagem (opcional):</label>
+                <input type="file" id="produto-img-upload" accept="image/*">
+                <div id="image-preview-container">
+                    <img id="image-preview" src="#" alt="Pré-visualização da Imagem">
+                    <div id="upload-progress">
+                        <div id="upload-progress-bar"></div>
+                    </div>
+                </div>
+                <!-- O campo produto-img (URL) será preenchido via JS após o upload, ou pode ser um fallback manual -->
+                <input type="hidden" id="produto-img"> 
+
+                <label for="produto-categoria">Categoria:</label>
+                <select id="produto-categoria" required>
+                    <option value="">Carregando categorias...</option>
+                </select>
+
+                <button type="submit" class="btn btn-save">Salvar Produto</button>
+                <button type="button" class="btn btn-reset" id="reset-form-btn">Limpar Formulário</button>
+            </form>
+            <div class="product-list" id="lista-produtos">
+                <!-- Produtos serão listados aqui -->
+            </div>
+        </div>
+
+        <!-- Seção: Horários de Funcionamento -->
+        <div id="horarios-section" class="admin-section">
+            <h2>Horários de Funcionamento</h2>
+            <form id="storeHoursForm">
+                <h3>Dias de Semana (Segunda a Quinta)</h3>
+                <div class="time-inputs">
+                    <label for="weekday-open-time">Abertura:</label>
+                    <input type="time" id="weekday-open-time" value="09:00">
+                    <label for="weekday-close-time">Fechamento:</label>
+                    <input type="time" id="weekday-close-time" value="22:00">
+                </div>
+
+                <h3>Horários Específicos</h3>
+
+                <h4>Sexta-feira</h4>
+                <div class="time-inputs">
+                    <label for="friday-open-time">Abertura:</label>
+                    <input type="time" id="friday-open-time" value="09:00">
+                    <label for="friday-close-time">Fechamento:</label>
+                    <input type="time" id="friday-close-time" value="14:00">
+                </div>
+
+                <h4>Sábado</h4>
+                <div class="time-inputs">
+                    <label for="saturday-open-time">Abertura:</label>
+                    <input type="time" id="saturday-open-time" value="09:00">
+                    <label for="saturday-close-time">Fechamento:</label>
+                    <input type="time" id="saturday-close-time" value="16:00">
+                </div>
+
+                <h4>Domingo</h4>
+                <div class="time-inputs">
+                    <label for="sunday-open-time">Abertura:</label>
+                    <input type="time" id="sunday-open-time" value="09:00">
+                    <label for="sunday-close-time">Fechamento:</label>
+                    <input type="time" id="sunday-close-time" value="14:00">
+                </div>
+
+                <button type="submit" class="btn btn-save">Salvar Horários Programados</button>
+            </form>
+        </div>
+
+        <!-- Seção: Controle Manual de Status -->
+        <div id="status-manual-section" class="admin-section">
+            <h2>Controle Manual de Status</h2>
+            <form id="manualStatusForm">
+                <div class="manual-status-controls">
+                    <input type="radio" id="manual-open" name="manual-status" value="open">
+                    <label for="manual-open">Aberto</label>
+
+                    <input type="radio" id="manual-closed" name="manual-status" value="closed">
+                    <label for="manual-closed">Fechado</label>
+
+                    <input type="checkbox" id="manual-override-active">
+                    <label for="manual-override-active">Ativar Controle Manual</label>
+                </div>
+                <button type="submit" class="btn btn-save">Salvar Status Manual</button>
+            </form>
+        </div>
+
+        <!-- Seção: Gerenciamento de Categorias -->
+        <div id="categorias-section" class="admin-section">
+            <h2>Gerenciamento de Categorias</h2>
+            <form id="categoryForm">
+                <input type="hidden" id="category-id">
+                <label for="category-name">Nome da Categoria:</label>
+                <input type="text" id="category-name" required>
+                <button type="submit" class="btn btn-save">Adicionar/Atualizar Categoria</button>
+                <button type="button" class="btn btn-reset" id="reset-category-form-btn">Limpar Formulário</button>
+            </form>
+            <div class="category-list" id="lista-categorias" style="margin-top: 20px;">
+                <!-- Categorias serão listadas aqui -->
+                <p>Carregando categorias...</p>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: Pedidos -->
+        <div id="pedidos-section" class="admin-section">
+            <h2>Pedidos dos Clientes</h2>
+            <div class="order-controls">
+                <input type="search" id="order-search-input" placeholder="Buscar por ID ou Cliente...">
+                <select id="order-status-filter">
+                    <option value="all">Todos os Status</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Preparando">Preparando</option>
+                    <option value="Entregue">Entregue</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
+            <div class="order-list" id="lista-pedidos">
+                <!-- Pedidos serão listados aqui -->
+                <p style="color:#bbb; text-align: center;">Carregando pedidos...</p>
+            </div>
+            <div class="pagination-controls">
+                <button id="prev-page-btn" disabled>&laquo; Anterior</button>
+                <span id="page-info">Página 1 de 1</span>
+                <button id="next-page-btn" disabled>Próximo &raquo;</button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: Relatórios -->
+        <div id="relatorios-section" class="admin-section">
+            <h2>Relatórios de Vendas</h2>
+            <div class="report-filters">
+                <button id="filter-today" class="active">Hoje</button>
+                <button id="filter-week">Semana</button>
+                <button id="filter-month">Mês</button>
+                <input type="date" id="filter-start-date">
+                <input type="date" id="filter-end-date">
+                <button id="filter-custom">Filtrar por Data</button>
+            </div>
+            <div class="reports-summary">
+                <div class="report-card">
+                    <h3>Total de Vendas</h3>
+                    <p id="total-sales">R$ 0,00</p>
+                </div>
+                <div class="report-card">
+                    <h3>Total de Pedidos</h3>
+                    <p id="total-orders">0</p>
+                </div>
+            </div>
+
+            <h3>Produtos Mais Vendidos</h3>
+            <div class="report-list" id="most-ordered-products">
+                <p style="color:#bbb; text-align: center;">Carregando dados...</p>
+            </div>
+
+            <h3>Extrato de Vendas Detalhado</h3>
+            <div class="report-list" id="detailed-sales-extract">
+                <p style="color:#bbb; text-align: center;">Detalhes das vendas aparecerão aqui.</p>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: Clientes Fidelidade -->
+        <div id="clientes-fidelidade-section" class="admin-section">
+            <h2>Clientes Fidelidade</h2>
+            <p style="color:#bbb; text-align: center; margin-bottom: 20px;">
+                Clientes com 5 ou mais pedidos "Entregues".
+            </p>
+            <div class="loyalty-customer-list" id="lista-clientes-fidelidade">
+                <!-- Clientes fidelidade serão listados aqui -->
+                <p style="color:#bbb; text-align: center;">Carregando clientes...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal para exibir pedidos filtrados do Dashboard -->
+    <div id="ordersModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-button" id="closeOrdersModal">&times;</button>
+            <h2 id="modalTitle">Pedidos Filtrados</h2>
+            <div class="order-list" id="modalOrdersList">
+                <!-- Pedidos filtrados serão carregados aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <!-- Importar o Firebase Storage SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, remove, get, update, runTransaction, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyApKcOo6okadeurYY0tQzV1KTFx0WoVJLA",
+            authDomain: "gf-frango-assado.firebaseapp.com",
+            databaseURL: "https://gf-frango-assado-default-rtdb.firebaseio.com",
+            projectId: "gf-frango-assado",
+            storageBucket: "gf-frango-assado.firebasestorage.app",
+            messagingSenderId: "651353269015",
+            appId: "1:651353269015:web:3fb1488d45daac6aa90d52",
+            measurementId: "G-BNX9JNGYSD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const storage = getStorage(app); // Inicializa o Firebase Storage
+
+        // Exporta as instâncias para que admin.js possa usá-las (se necessário, ou ajuste admin.js para importar diretamente)
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseStorage = storage; // Exporta storage também
+    </script>
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
