@@ -24,7 +24,7 @@ const auth = getAuth(app);
 const database = getDatabase(app);
 
 
-// Referências DOM
+// Referências DOM (com checagem de existência)
 const menuInicioLink = document.getElementById('menu-inicio');
 const menuPerfilLink = document.getElementById('menu-perfil');
 const menuCardapioLink = document.getElementById('menu-cardapio');
@@ -53,7 +53,9 @@ profileStatusMessage.style.textAlign = 'center';
 profileStatusMessage.style.marginBottom = '15px';
 profileStatusMessage.style.color = 'var(--amarelo)';
 profileStatusMessage.style.fontSize = '0.9em';
-profileModalBg.querySelector('.modal-content').prepend(profileStatusMessage);
+if (profileModalBg && profileModalBg.querySelector('.modal-content')) {
+    profileModalBg.querySelector('.modal-content').prepend(profileStatusMessage);
+}
 
 const menuModalBg = document.getElementById('menu-modal-bg');
 const closeMenuModalButton = document.getElementById('close-menu-modal');
@@ -238,430 +240,204 @@ function hideModal(modalBgId) {
     document.getElementById(modalBgId).style.display = 'none';
 }
 
-menuInicioLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    document.querySelectorAll('.modal-bg').forEach(modal => {
-        modal.style.display = 'none';
-    });
-    document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
-    menuInicioLink.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-menuPerfilLink.addEventListener('click', async (e) => {
-    e.preventDefault();
-    if (await ensureUserIsSignedIn()) {
-        showModal('profile-modal-bg');
-        document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
-        menuPerfilLink.classList.add('active');
-        loadUserProfile(currentUser.uid);
-    }
-});
-
-menuCardapioLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    showModal('menu-modal-bg');
-    document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
-    menuCardapioLink.classList.add('active');
-    loadProducts();
-    loadCategories();
-});
-
-menuPedidosLink.addEventListener('click', async (e) => {
-    e.preventDefault();
-    if (await ensureUserIsSignedIn()) {
-        showModal('orders-modal-bg');
-        document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
-        menuPedidosLink.classList.add('active');
-        loadUserOrders(currentUser.uid);
-    }
-});
-
-document.querySelectorAll('.modal-bg').forEach(modalBg => {
-    modalBg.addEventListener('click', (e) => {
-        if (e.target === modalBg) {
-            hideModal(modalBg.id);
-        }
-    });
-});
-
-closeProfileModalButton.addEventListener('click', () => hideModal('profile-modal-bg'));
-closeMenuModalButton.addEventListener('click', () => hideModal('menu-modal-bg'));
-closeCartButton.addEventListener('click', () => hideModal('cart-modal-bg'));
-closeOrdersModalButton.addEventListener('click', () => hideModal('orders-modal-bg'));
-
-// ==========================================================
-// AUTENTICAÇÃO
-// ==========================================================
-
-onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    // Não mostra mensagem de status no perfil
-    profileStatusMessage.textContent = '';
-});
-
-// ==========================================================
-// CARREGAMENTO DE PRODUTOS E CATEGORIAS
-// ==========================================================
-
-let allProducts = [];
-
-function loadProducts() {
-    productListingDiv.innerHTML = '<p style="color:#bbb; text-align: center;">Carregando produtos...</p>';
-    const productsRef = ref(database, 'produtos');
-    onValue(productsRef, (snapshot) => {
-        allProducts = [];
-        if (snapshot.exists()) {
-            snapshot.forEach(childSnapshot => {
-                allProducts.push({ id: childSnapshot.key, ...childSnapshot.val() });
-            });
-            console.log("Produtos carregados:", allProducts.length);
-        } else {
-            console.log("Nenhum produto encontrado.");
-        }
-        filterProducts('all');
-    }, (error) => {
-        console.error("Erro ao carregar produtos:", error);
-        productListingDiv.innerHTML = '<p style="color:#bbb; text-align: center;">Erro ao carregar produtos.</p>';
-    });
-}
-
-function loadCategories() {
-    const categoriesRef = ref(database, 'config/categories');
-    onValue(categoriesRef, (snapshot) => {
-        categoryFilterNav.innerHTML = '<button class="filter-btn active" data-category="all">Todas as Categorias</button>';
-        if (snapshot.exists()) {
-            snapshot.forEach(childSnapshot => {
-                const categoryId = childSnapshot.key;
-                const categoryName = childSnapshot.val().name;
-                const button = document.createElement('button');
-                button.className = 'filter-btn';
-                button.textContent = categoryName;
-                button.setAttribute('data-category', categoryId);
-                categoryFilterNav.appendChild(button);
-            });
-        } else {
-            console.log("Nenhuma categoria encontrada.");
-        }
-        document.querySelectorAll('.filter-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                filterProducts(e.target.getAttribute('data-category'));
-            });
+if (menuInicioLink) {
+    menuInicioLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.modal-bg').forEach(modal => {
+            modal.style.display = 'none';
         });
+        document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
+        menuInicioLink.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+if (menuPerfilLink) {
+    menuPerfilLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (await ensureUserIsSignedIn()) {
+            showModal('profile-modal-bg');
+            document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
+            menuPerfilLink.classList.add('active');
+            loadUserProfile(currentUser.uid);
+        }
+    });
+}
+if (menuCardapioLink) {
+    menuCardapioLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showModal('menu-modal-bg');
+        document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
+        menuCardapioLink.classList.add('active');
+        loadProducts();
+        loadCategories();
+    });
+}
+if (menuPedidosLink) {
+    menuPedidosLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (await ensureUserIsSignedIn()) {
+            showModal('orders-modal-bg');
+            document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active'));
+            menuPedidosLink.classList.add('active');
+            loadUserOrders(currentUser.uid);
+        }
     });
 }
 
-function filterProducts(categoryId) {
-    productListingDiv.innerHTML = '';
-    let filteredProducts = [];
+// Fecha modais apenas se os botões existirem
+if (closeProfileModalButton) closeProfileModalButton.addEventListener('click', () => hideModal('profile-modal-bg'));
+if (closeMenuModalButton) closeMenuModalButton.addEventListener('click', () => hideModal('menu-modal-bg'));
+if (closeCartButton) closeCartButton.addEventListener('click', () => hideModal('cart-modal-bg'));
+if (closeOrdersModalButton) closeOrdersModalButton.addEventListener('click', () => hideModal('orders-modal-bg'));
 
-    if (categoryId === 'all') {
-        filteredProducts = allProducts;
-    } else {
-        filteredProducts = allProducts.filter(product => product.categoria === categoryId);
-    }
+// Adiciona event listener para abrir carrinho
+if (btnCarrinho) btnCarrinho.addEventListener('click', () => showModal('cart-modal-bg'));
 
-    if (filteredProducts.length === 0) {
-        productListingDiv.innerHTML = '<p style="color:#bbb; text-align: center;">Nenhum produto encontrado nesta categoria.</p>';
-        return;
-    }
-
-    filteredProducts.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.className = 'produto-card';
-        productCard.innerHTML = `
-            <img src="${product.imgurl || 'https://placehold.co/70x70/cccccc/333333?text=Produto'}" alt="${product.nome}" class="produto-img" onerror="this.onerror=null;this.src='https://placehold.co/70x70/cccccc/333333?text=Produto';">
-            <div class="produto-info">
-                <div class="produto-nome">${product.nome}</div>
-                <div class="produto-desc">${product.desc}</div>
-                <div>
-                    ${product.precoAntigo ? `<span class="produto-preco-antigo">${formatCurrency(product.precoAntigo)}</span>` : ''}
-                    <span class="produto-preco">${formatCurrency(product.preco)}</span>
-                </div>
-            </div>
-            <button class="produto-btn" data-product-id="${product.id}">Adicionar</button>
-        `;
-        productListingDiv.appendChild(productCard);
-    });
-
-    document.querySelectorAll('#product-listing .produto-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const productId = e.target.getAttribute('data-product-id');
-            const product = allProducts.find(p => p.id === productId);
-            if (product) {
-                addToCart(product);
+// Checagem para modais de fundo
+if (document.querySelectorAll('.modal-bg').length > 0) {
+    document.querySelectorAll('.modal-bg').forEach(modalBg => {
+        modalBg.addEventListener('click', (e) => {
+            if (e.target === modalBg) {
+                hideModal(modalBg.id);
             }
         });
     });
 }
 
-// Função para carregar e exibir os produtos mais vendidos
-function loadMaisVendidos() {
-    mostSoldProductsList.innerHTML = '<p style="color:#bbb; text-align: center;">Calculando mais vendidos...</p>';
-    const usersRef = ref(database, 'users');
-    onValue(usersRef, (snapshot) => {
-        const productCounts = {}; // { productId: count }
-        if (snapshot.exists()) {
-            snapshot.forEach(userSnapshot => {
-                const orders = userSnapshot.child('pedidos').val();
-                if (orders) {
-                    Object.values(orders).forEach(order => {
-                        if (order.itens) {
-                            order.itens.forEach(itemString => {
-                                // Ex: "2x Frango Assado Inteiro - R$ 50,00"
-                                const match = itemString.match(/(\d+)x (.+) - R\$ ([\d,.]+)/);
-                                if (match) {
-                                    const quantity = parseInt(match[1]);
-                                    const productName = match[2].trim();
-                                    // Encontra o ID do produto pelo nome (pode ser impreciso se nomes não forem únicos)
-                                    const product = allProducts.find(p => p.nome === productName);
-                                    if (product) {
-                                        productCounts[product.id] = (productCounts[product.id] || 0) + quantity;
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
-        const sortedProducts = Object.entries(productCounts)
-            .sort(([, countA], [, countB]) => countB - countA)
-            .slice(0, 5); // Top 5 mais vendidos
-
-        mostSoldProductsList.innerHTML = '';
-        if (sortedProducts.length === 0) {
-            mostSoldProductsList.innerHTML = '<p style="color:#bbb; text-align: center;">Nenhum produto mais vendido ainda.</p>';
+// Checagem para formulário de perfil
+if (profileForm) {
+    profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!(await ensureUserIsSignedIn())) {
             return;
         }
 
-        sortedProducts.forEach(([productId, count]) => {
-            const product = allProducts.find(p => p.id === productId);
-            if (product) {
-                const productCard = document.createElement('div');
-                productCard.className = 'produto-card';
-                productCard.innerHTML = `
-                    <img src="${product.imgurl || 'https://placehold.co/70x70/cccccc/333333?text=Produto'}" alt="${product.nome}" class="produto-img" onerror="this.onerror=null;this.src='https://placehold.co/70x70/cccccc/333333?text=Produto';">
-                    <div class="produto-info">
-                        <div class="produto-nome">${product.nome}</div>
-                        <div class="produto-desc">${product.desc}</div>
-                        <div>
-                            <span class="produto-preco">${formatCurrency(product.preco)}</span>
-                        </div>
-                    </div>
-                    <button class="produto-btn" data-product-id="${product.id}">Adicionar</button>
-                `;
-                mostSoldProductsList.appendChild(productCard);
-            }
-        });
+        const profileData = {
+            name: profileNameInput.value,
+            cpfCnpj: profileCpfCnpjInput.value,
+            birthdate: profileBirthdateInput.value,
+            phone: profilePhoneInput.value,
+            gender: profileGenderSelect.value,
+            email: profileEmailInput.value,
+            cep: profileCepInput.value,
+            address: profileAddressInput.value,
+            number: profileNumberInput.value,
+            complement: profileComplementInput.value,
+            neighborhood: profileNeighborhoodInput.value,
+            city: profileCityInput.value,
+            state: profileStateInput.value
+        };
 
-        // Adiciona event listeners aos botões "Adicionar" nos mais vendidos
-        mostSoldProductsList.querySelectorAll('.produto-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const productId = e.target.getAttribute('data-product-id');
-                const product = allProducts.find(p => p.id === productId);
-                if (product) {
-                    addToCart(product);
-                }
-            });
-        });
+        console.log("Salvando perfil para UID:", currentUser.uid, "Dados:", profileData);
 
-    }, { onlyOnce: false }); // Escuta mudanças em tempo real para os mais vendidos
-}
-
-
-// ==========================================================
-// CARRINHO DE COMPRAS
-// ==========================================================
-
-btnCarrinho.addEventListener('click', () => showModal('cart-modal-bg'));
-
-function addToCart(product) {
-    const existingItem = cart.find(item => item.id === product.id);
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({ ...product, quantity: 1 });
-    }
-    updateCartUI();
-    saveCart();
-    showMessageModal(`${product.nome} adicionado ao carrinho!`, [{ text: 'Continuar Comprando', onClick: hideMessageModal }, { text: 'Ver Carrinho', onClick: () => showModal('cart-modal-bg') }]);
-}
-
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    updateCartUI();
-    saveCart();
-}
-
-function updateCartItemQuantity(productId, newQuantity) {
-    const item = cart.find(item => item.id === productId);
-    if (item) {
-        item.quantity = newQuantity;
-        if (item.quantity <= 0) {
-            removeFromCart(productId);
+        try {
+            const userProfileRef = ref(database, `users/${currentUser.uid}/profile`);
+            await set(userProfileRef, profileData);
+            showMessageModal('Perfil salvo com sucesso!');
+            hideModal('profile-modal-bg');
+        } catch (error) {
+            console.error("Erro ao salvar perfil:", error);
+            showMessageModal('Erro ao salvar perfil. Tente novamente.');
         }
-    }
-    updateCartUI();
-    saveCart();
+    });
 }
 
-function calculateCartTotal() {
-    let total = cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
-
-    // Adiciona taxa de delivery se aplicável (manteve a lógica do HTML)
-    if (modoEntregaSelect.value === 'Delivery') {
-        total += 5.00; // Taxa de R$5,00 para delivery
-    }
-    return total;
-}
-
-function updateCartUI() {
-    cartListaDiv.innerHTML = '';
-    
-    if (cart.length === 0) {
-        cartListaDiv.innerHTML = '<p style="text-align: center; color: #666;">Seu carrinho está vazio.</p>';
-        btnCarrinho.classList.remove('animate-bounce');
-    } else {
-        btnCarrinho.classList.add('animate-bounce');
-        cart.forEach(item => {
-            const itemTotal = item.preco * item.quantity;
-
-            const cartItemDiv = document.createElement('div');
-            cartItemDiv.className = 'cart-item';
-            cartItemDiv.innerHTML = `
-                <span>${item.quantity}x ${item.nome}</span>
-                <div>
-                    <span>${formatCurrency(itemTotal)}</span>
-                    <button class="cart-remove-btn" data-action="decrease" data-id="${item.id}">-</button>
-                    <button class="cart-remove-btn" data-action="increase" data-id="${item.id}">+</button>
-                    <button class="cart-remove-btn" data-action="remove" data-id="${item.id}">Remover</button>
-                </div>
-            `;
-            cartListaDiv.appendChild(cartItemDiv);
-        });
-
-        cartListaDiv.querySelectorAll('button[data-action]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const productId = e.target.getAttribute('data-id');
-                const action = e.target.getAttribute('data-action');
-                if (action === 'increase') {
-                    updateCartItemQuantity(productId, cart.find(i => i.id === productId).quantity + 1);
-                } else if (action === 'decrease') {
-                    updateCartItemQuantity(productId, cart.find(i => i.id === productId).quantity - 1);
-                } else if (action === 'remove') {
-                    removeFromCart(productId);
-                }
-            });
-        });
-    }
-
-    const total = calculateCartTotal();
-    cartTotalDiv.textContent = `Total: ${formatCurrency(total)}`;
-    cartCountSpan.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-    discountMessageDiv.textContent = ''; // Limpa qualquer texto residual
-}
-
-function saveCart() {
-    localStorage.setItem('cart', JSON.stringify(cart));
-}
-
-// Lógica de modo de entrega e endereço
-modoEntregaSelect.addEventListener('change', (e) => {
-    if (e.target.value === 'Delivery') {
-        clienteEnderecoInput.style.display = 'block';
-    } else {
-        clienteEnderecoInput.style.display = 'none';
-    }
-    updateCartUI(); // Recalcula total com ou sem taxa de delivery
-});
-
-whatsappButton.addEventListener('click', async () => {
-    if (cart.length === 0) {
-        showMessageModal('Seu carrinho está vazio. Adicione produtos antes de finalizar o pedido!');
-        return;
-    }
-
-    if (!(await ensureUserIsSignedIn())) {
-        return;
-    }
-
-    const nomeCliente = clienteNomeInput.value || 'Cliente Anônimo';
-    const telefoneCliente = profilePhoneInput.value || clienteTelefoneInput.value;
-    const modoEntrega = modoEntregaSelect.value;
-    const enderecoCliente = clienteEnderecoInput.value;
-    const formaPagamento = formaPagamentoSelect.value;
-    const totalPedido = calculateCartTotal();
-    
-    if (modoEntrega === 'Delivery' && !enderecoCliente) {
-        showMessageModal('Por favor, informe o endereço para delivery.');
-        return;
-    }
-    
-    if (!telefoneCliente) {
-        showMessageModal('Por favor, informe seu telefone para contato (no perfil ou no carrinho).');
-        return;
-    }
-
-    const orderItems = cart.map(item => `${item.quantity}x ${item.nome} - ${formatCurrency(item.preco)}`).join('\n');
-    const now = new Date();
-    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-
-    let message = `Olá! Meu nome é *${nomeCliente}* e gostaria de fazer um pedido:\n\n`;
-    message += `*Itens:*\n${orderItems}\n\n`;
-    message += `*Total:* ${formatCurrency(totalPedido)}\n`;
-    message += `*Modo de Entrega:* ${modoEntrega}\n`;
-    if (modoEntrega === 'Delivery') {
-        message += `*Endereço:* ${enderecoCliente}\n`;
-    }
-    message += `*Forma de Pagamento:* ${formaPagamento}\n`;
-    message += `*Data/Hora do Pedido:* ${formattedDate}\n\n`;
-    message += `Aguardando confirmação!`;
-
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=+55${telefoneCliente}&text=${encodeURIComponent(message)}`;
-
-    try {
-        const userOrdersRef = ref(database, `users/${currentUser.uid}/pedidos`);
-        const newOrderRef = push(userOrdersRef);
-        await set(newOrderRef, {
-            nomeCliente: nomeCliente,
-            telefoneCliente: telefoneCliente,
-            modo: modoEntrega,
-            endereco: modoEntrega === 'Delivery' ? enderecoCliente : null,
-            pagamento: formaPagamento,
-            total: totalPedido,
-            itens: cart.map(item => `${item.quantity}x ${item.nome} - ${formatCurrency(item.preco)}`),
-            data: formattedDate,
-            status: 'Pendente'
-        });
-
-        const userProfileRef = ref(database, `users/${currentUser.uid}/profile`);
-        await update(userProfileRef, {
-            name: nomeCliente,
-            phone: telefoneCliente,
-            address: modoEntrega === 'Delivery' ? enderecoCliente : null,
-        });
-
-        showMessageModal('Pedido enviado com sucesso! Você será redirecionado para o WhatsApp.', [
-            { text: 'OK', onClick: () => { window.open(whatsappUrl, '_blank'); hideMessageModal(); } },
-            { text: 'Ver Pedidos', onClick: () => { showModal('orders-modal-bg'); hideModal('custom-message-modal-bg'); } }
-        ]);
-
-        cart = [];
-        saveCart();
+// Checagem para select de modo de entrega
+if (modoEntregaSelect && clienteEnderecoInput) {
+    modoEntregaSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'Delivery') {
+            clienteEnderecoInput.style.display = 'block';
+        } else {
+            clienteEnderecoInput.style.display = 'none';
+        }
         updateCartUI();
-        hideModal('cart-modal-bg');
-        currentDiscount = 0; // Garante que esteja zerado
-    } catch (error) {
-        console.error("Erro ao finalizar pedido:", error);
-        showMessageModal('Erro ao finalizar pedido. Tente novamente.');
-    }
-});
+    });
+}
 
+// Checagem para botão do WhatsApp
+if (whatsappButton) {
+    whatsappButton.addEventListener('click', async () => {
+        if (cart.length === 0) {
+            showMessageModal('Seu carrinho está vazio. Adicione produtos antes de finalizar o pedido!');
+            return;
+        }
+
+        if (!(await ensureUserIsSignedIn())) {
+            return;
+        }
+
+        const nomeCliente = clienteNomeInput.value || 'Cliente Anônimo';
+        const telefoneCliente = profilePhoneInput.value || clienteTelefoneInput.value;
+        const modoEntrega = modoEntregaSelect.value;
+        const enderecoCliente = clienteEnderecoInput.value;
+        const formaPagamento = formaPagamentoSelect.value;
+        const totalPedido = calculateCartTotal();
+        
+        if (modoEntrega === 'Delivery' && !enderecoCliente) {
+            showMessageModal('Por favor, informe o endereço para delivery.');
+            return;
+        }
+        
+        if (!telefoneCliente) {
+            showMessageModal('Por favor, informe seu telefone para contato (no perfil ou no carrinho).');
+            return;
+        }
+
+        const orderItems = cart.map(item => `${item.quantity}x ${item.nome} - ${formatCurrency(item.preco)}`).join('\n');
+        const now = new Date();
+        const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+        let message = `Olá! Meu nome é *${nomeCliente}* e gostaria de fazer um pedido:\n\n`;
+        message += `*Itens:*\n${orderItems}\n\n`;
+        message += `*Total:* ${formatCurrency(totalPedido)}\n`;
+        message += `*Modo de Entrega:* ${modoEntrega}\n`;
+        if (modoEntrega === 'Delivery') {
+            message += `*Endereço:* ${enderecoCliente}\n`;
+        }
+        message += `*Forma de Pagamento:* ${formaPagamento}\n`;
+        message += `*Data/Hora do Pedido:* ${formattedDate}\n\n`;
+        message += `Aguardando confirmação!`;
+
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=+55${telefoneCliente}&text=${encodeURIComponent(message)}`;
+
+        try {
+            const userOrdersRef = ref(database, `users/${currentUser.uid}/pedidos`);
+            const newOrderRef = push(userOrdersRef);
+            await set(newOrderRef, {
+                nomeCliente: nomeCliente,
+                telefoneCliente: telefoneCliente,
+                modo: modoEntrega,
+                endereco: modoEntrega === 'Delivery' ? enderecoCliente : null,
+                pagamento: formaPagamento,
+                total: totalPedido,
+                itens: cart.map(item => `${item.quantity}x ${item.nome} - ${formatCurrency(item.preco)}`),
+                data: formattedDate,
+                status: 'Pendente'
+            });
+
+            const userProfileRef = ref(database, `users/${currentUser.uid}/profile`);
+            await update(userProfileRef, {
+                name: nomeCliente,
+                phone: telefoneCliente,
+                address: modoEntrega === 'Delivery' ? enderecoCliente : null,
+            });
+
+            showMessageModal('Pedido enviado com sucesso! Você será redirecionado para o WhatsApp.', [
+                { text: 'OK', onClick: () => { window.open(whatsappUrl, '_blank'); hideMessageModal(); } },
+                { text: 'Ver Pedidos', onClick: () => { showModal('orders-modal-bg'); hideModal('custom-message-modal-bg'); } }
+            ]);
+
+            cart = [];
+            saveCart();
+            updateCartUI();
+            hideModal('cart-modal-bg');
+            currentDiscount = 0; // Garante que esteja zerado
+        } catch (error) {
+            console.error("Erro ao finalizar pedido:", error);
+            showMessageModal('Erro ao finalizar pedido. Tente novamente.');
+        }
+    });
+}
 
 // ==========================================================
 // FUNÇÕES DE PERFIL DO CLIENTE
@@ -937,9 +713,11 @@ async function cancelOrder(uid, orderId) {
 // INICIALIZAÇÃO
 // ==========================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadStoreStatus();
-    updateCartUI();
-    ensureUserIsSignedIn();
-    loadMaisVendidos(); // Carrega os mais vendidos na inicialização
-});
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStoreStatus();
+        updateCartUI();
+        ensureUserIsSignedIn();
+        loadMaisVendidos(); // Carrega os mais vendidos na inicialização
+    });
+}

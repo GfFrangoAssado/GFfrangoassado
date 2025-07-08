@@ -42,6 +42,7 @@ const productNameInput = document.getElementById('produto-nome');
 const productDescInput = document.getElementById('produto-desc');
 const productPriceInput = document.getElementById('produto-preco');
 const productOldPriceInput = document.getElementById('produto-preco-antigo');
+const productStockInput = document.getElementById('produto-estoque'); // NOVO: Campo de estoque
 const productImgUploadInput = document.getElementById('produto-img-upload'); // NOVO: Input de arquivo
 const productImgInput = document.getElementById('produto-img'); // Campo hidden para a URL da imagem
 const imagePreview = document.getElementById('image-preview'); // Pré-visualização
@@ -423,7 +424,7 @@ logoutBtn.addEventListener('click', () => {
 });
 
 // ==========================================================
-// FUNÇÕES DE CRUD DE PRODUTOS (COM UPLOAD DE IMAGEM)
+// FUNÇÕES DE CRUD DE PRODUTOS (COM UPLOAD DE IMAGEM E ESTOQUE)
 // ==========================================================
 
 // Variável para armazenar o arquivo de imagem selecionado
@@ -456,6 +457,7 @@ productForm.onsubmit = async (e) => {
     const productDesc = productDescInput.value;
     const productPrice = parseFloat(productPriceInput.value);
     const productOldPrice = productOldPriceInput.value ? parseFloat(productOldPriceInput.value) : null;
+    const productStock = productStockInput.value ? parseInt(productStockInput.value) : 0; // NOVO
     const productCategory = productCategorySelect.value;
     let imgurl = productImgInput.value; // Pega a URL atual (se já existir ou for de edição)
 
@@ -490,7 +492,7 @@ productForm.onsubmit = async (e) => {
                     uploadProgress.style.display = 'none'; // Esconde a barra ao finalizar
 
                     // Agora que temos a URL, salvamos o produto
-                    await saveProductToDatabase(id, productName, productDesc, productPrice, productOldPrice, productCategory, imgurl);
+                    await saveProductToDatabase(id, productName, productDesc, productPrice, productOldPrice, productCategory, imgurl, productStock);
                 }
             );
         } catch (error) {
@@ -500,19 +502,20 @@ productForm.onsubmit = async (e) => {
         }
     } else {
         // Se nenhum novo arquivo foi selecionado, salva o produto com a URL existente (ou vazia)
-        await saveProductToDatabase(id, productName, productDesc, productPrice, productOldPrice, productCategory, imgurl);
+        await saveProductToDatabase(id, productName, productDesc, productPrice, productOldPrice, productCategory, imgurl, productStock);
     }
 };
 
 // Função auxiliar para salvar o produto no banco de dados
-async function saveProductToDatabase(id, nome, desc, preco, precoAntigo, categoria, imgurl) {
+async function saveProductToDatabase(id, nome, desc, preco, precoAntigo, categoria, imgurl, estoque) {
     const produto = {
         nome: nome,
         desc: desc,
         preco: preco,
         precoAntigo: precoAntigo,
         categoria: categoria,
-        imgurl: imgurl // Usa a URL final (upload ou existente)
+        imgurl: imgurl, // Usa a URL final (upload ou existente)
+        estoque: estoque // NOVO
     };
 
     try {
@@ -550,10 +553,12 @@ function renderProdutos() {
                     <div class="product-category">Categoria: ${produto.categoria}</div>
                     <div class="product-price">Preço: R$ ${Number(produto.preco).toFixed(2).replace('.', ',')}</div>
                     ${produto.precoAntigo ? `<div class="product-price">De: R$ ${Number(produto.precoAntigo).toFixed(2).replace('.', ',')}</div>` : ''}
+                    <div class="product-stock">Estoque: <span id="estoque-${key}">${produto.estoque ?? 0}</span></div>
                 </div>
                 <div class="product-actions">
                     <button class="btn-edit" data-id="${key}">Editar</button>
                     <button class="btn-delete" data-id="${key}">Excluir</button>
+                    <button class="btn-update-stock" data-id="${key}">Atualizar Estoque</button>
                 </div>
             `;
             listaProdutosDiv.appendChild(productItem);
@@ -572,10 +577,28 @@ function renderProdutos() {
                 deleteProduto(productId);
             });
         });
+        document.querySelectorAll('.btn-update-stock').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const productId = e.target.getAttribute('data-id');
+                updateProductStock(productId);
+            });
+        });
     });
 }
 
-// Função editProduto ajustada para carregar a imagem existente
+// Função para atualizar o estoque manualmente
+function updateProductStock(productId) {
+    const estoqueAtual = prompt('Informe o novo valor de estoque para este produto:');
+    if (estoqueAtual !== null && !isNaN(estoqueAtual)) {
+        const estoqueInt = parseInt(estoqueAtual);
+        update(ref(db, 'produtos/' + productId), { estoque: estoqueInt });
+        alert('Estoque atualizado!');
+    } else {
+        alert('Valor inválido.');
+    }
+}
+
+// Função editProduto ajustada para carregar a imagem existente e o estoque
 async function editProduto(id) {
     const productRef = ref(db, 'produtos/' + id);
     const snapshot = await get(productRef);
@@ -587,7 +610,8 @@ async function editProduto(id) {
         productPriceInput.value = produto.preco;
         productOldPriceInput.value = produto.precoAntigo;
         productCategorySelect.value = produto.categoria;
-        productImgInput.value = produto.imgurl || ''; // Carrega a URL existente (se houver)
+        productImgInput.value = produto.imgurl || '';
+        productStockInput.value = produto.estoque ?? 0; // NOVO
 
         // Exibe a pré-visualização da imagem existente
         if (produto.imgurl) {
@@ -650,6 +674,7 @@ function resetProductForm() {
     productDescInput.value = '';
     productPriceInput.value = '';
     productOldPriceInput.value = '';
+    productStockInput.value = ''; // NOVO: Limpa o campo de estoque
     productCategorySelect.value = '';
     productImgInput.value = ''; // Limpa o campo hidden da URL
     productImgUploadInput.value = ''; // Limpa o input de arquivo
@@ -1634,3 +1659,90 @@ ordersModalOverlay.addEventListener('click', (e) => {
         hideOrdersModal();
     }
 });
+
+// =========================
+// VENDA NO BALCÃO (INICIAL)
+// =========================
+// Elementos do formulário de venda no balcão
+const balcaoForm = document.getElementById('balcaoForm');
+const balcaoProdutosDiv = document.getElementById('balcao-produtos');
+const balcaoTotalSpan = document.getElementById('balcao-total');
+const balcaoPagamentoSelect = document.getElementById('balcao-pagamento');
+
+// Renderiza os produtos para seleção no balcão
+function renderProdutosBalcao() {
+    onValue(ref(db, 'produtos'), (snapshot) => {
+        balcaoProdutosDiv.innerHTML = '';
+        if (!snapshot.exists()) {
+            balcaoProdutosDiv.innerHTML = '<p style="color:#bbb; text-align: center;">Nenhum produto cadastrado.</p>';
+            return;
+        }
+        snapshot.forEach((childSnapshot) => {
+            const key = childSnapshot.key;
+            const produto = childSnapshot.val();
+            const prodDiv = document.createElement('div');
+            prodDiv.innerHTML = `
+                <label>
+                    <input type="number" min="0" value="0" data-id="${key}" data-preco="${produto.preco}" data-nome="${produto.nome}" style="width:60px;"> ${produto.nome} (R$ ${Number(produto.preco).toFixed(2).replace('.', ',')}) - Estoque: ${produto.estoque ?? 0}
+                </label>
+            `;
+            balcaoProdutosDiv.appendChild(prodDiv);
+        });
+        balcaoProdutosDiv.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', calcularTotalBalcao);
+        });
+    });
+}
+
+function calcularTotalBalcao() {
+    let total = 0;
+    balcaoProdutosDiv.querySelectorAll('input[type="number"]').forEach(input => {
+        const qtd = parseInt(input.value) || 0;
+        const preco = parseFloat(input.getAttribute('data-preco'));
+        total += qtd * preco;
+    });
+    balcaoTotalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
+
+// Evento de submit do formulário de venda no balcão
+if (balcaoForm) {
+    balcaoForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const itens = [];
+        let total = 0;
+        const updates = {};
+        balcaoProdutosDiv.querySelectorAll('input[type="number"]').forEach(input => {
+            const qtd = parseInt(input.value) || 0;
+            if (qtd > 0) {
+                const nome = input.getAttribute('data-nome');
+                const preco = parseFloat(input.getAttribute('data-preco'));
+                const id = input.getAttribute('data-id');
+                itens.push(`${qtd}x ${nome} - R$ ${preco.toFixed(2).replace('.', ',')}`);
+                total += qtd * preco;
+                // Atualiza o estoque
+                updates[`produtos/${id}/estoque`] = (parseInt(input.getAttribute('data-estoque')) || 0) - qtd;
+            }
+        });
+        if (itens.length === 0) {
+            alert('Selecione pelo menos um produto.');
+            return;
+        }
+        const pagamento = balcaoPagamentoSelect.value;
+        const data = new Date();
+        const formattedDate = `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}, ${String(data.getHours()).padStart(2, '0')}:${String(data.getMinutes()).padStart(2, '0')}:${String(data.getSeconds()).padStart(2, '0')}`;
+        // Salva a venda no nó balcaoSales
+        await push(ref(db, 'balcaoSales'), {
+            itens,
+            total,
+            pagamento,
+            data: formattedDate
+        });
+        // Atualiza o estoque em lote
+        await update(ref(db), updates);
+        alert('Venda registrada!');
+        balcaoForm.reset();
+        calcularTotalBalcao();
+        renderProdutosBalcao();
+    };
+    renderProdutosBalcao();
+}
