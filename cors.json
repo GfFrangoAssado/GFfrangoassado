@@ -1,7 +1,16 @@
+<<<<<<< HEAD
 [
   {
     "origin": ["http://127.0.0.1:8080"],
     "method": ["GET", "PUT", "POST", "DELETE"],
     "maxAgeSeconds": 3600
   }
+=======
+[
+  {
+    "origin": ["http://127.0.0.1:8080"],
+    "method": ["GET", "PUT", "POST", "DELETE"],
+    "maxAgeSeconds": 3600
+  }
+>>>>>>> b73244e1951affabae61f7ec9de19e6d292cbdb8
 ]

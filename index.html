@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -188,4 +189,717 @@
   </div>
   <script src="script.js" type="module"></script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GF Frango Assado</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap">
+  <!-- Adicionado Font Awesome para ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="logo-gf.png" type="image/png">
+  <style>
+    :root {
+      --roxo: #7d37ff;
+      --azul: #36eaff;
+      --vermelho: #d32f2f;
+      --cinza: #232338;
+      --preto: #181829;
+      --amarelo: #ffe66e;
+    }
+    html, body { margin:0; padding:0; background: var(--preto); font-family: 'Montserrat', Arial, sans-serif; }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 80px;
+      height: 100vh;
+      background: #181829;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 34px;
+      z-index: 50;
+      box-shadow: 2px 0 18px #0005;
+      transition: width .2s;
+    }
+    .sidebar .side-link {
+      width: 100%;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 22px 0 12px 0;
+      text-align: center;
+      font-size: 1.19em;
+      border-left: 5px solid transparent;
+      transition: background .18s, border-color .18s, color .18s;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .sidebar .side-link.active, .sidebar .side-link:hover {
+      background: #232338;
+      color: var(--amarelo, #ffe66e);
+      border-left: 5px solid var(--amarelo, #ffe66e);
+    }
+    .sidebar .side-link i {
+      font-size: 2.6em; /* Ícones grandes */
+      margin-bottom: 3px;
+      line-height: 1;
+      display: block;
+      text-shadow: 0 4px 18px #0009;
+    }
+    @media (max-width: 700px) {
+      .sidebar { width: 58px; }
+      .sidebar .side-link { font-size: 0.97em; padding: 13px 0 7px 0;}
+      .sidebar .side-link i { font-size: 1.7em; }
+      .main-container, .header-bg, .promocao-dia { margin-left: 58px !important; }
+    }
+    @media (max-width: 500px) {
+      .sidebar { width: 44px; padding-top: 6px;}
+      .sidebar .side-link { font-size: 0.86em; }
+      .sidebar .side-link i { font-size: 1.15em;}
+      .main-container, .header-bg, .promocao-dia { margin-left: 44px !important; }
+    }
+    .header-bg {
+      width: 100vw;
+      min-height: 140px;
+      background: linear-gradient(90deg, var(--vermelho) 0%, var(--roxo) 80%, var(--azul) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-left: 80px;
+      box-shadow: 0 2px 18px #0002;
+      border-radius: 0 0 18px 18px;
+    }
+    .logo-central {
+      width: 220px;
+      max-width: 80vw;
+      height: auto;
+      margin-top: 26px;
+      margin-bottom: 0;
+      background: none;
+      display: block;
+      z-index: 3;
+    }
+    .promocao-dia {
+      background: linear-gradient(90deg, var(--roxo) 0%, var(--vermelho) 90%);
+      color: #fff;
+      font-weight: bold;
+      font-size: 1em;
+      border-radius: 12px;
+      padding: 0.7em 1.2em;
+      margin: 12px auto 8px auto;
+      text-align: center;
+      width: 90vw;
+      max-width: 350px;
+      box-shadow: 0 2px 12px #0002;
+      position: relative;
+      z-index: 2;
+      margin-left: 80px;
+    }
+    .status-bar {
+      background: #232338;
+      color: #fff;
+      padding: 0.5em 1em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.95em;
+      gap: 1em;
+      border-radius: 12px;
+      width: fit-content;
+      margin: -10px auto 10px auto;
+      box-shadow: 0 2px 10px #0002;
+      margin-left: 80px;
+    }
+    .status-aberto { color: #64ff7b; font-weight: bold; }
+    .status-fechado { color: #d32f2f; font-weight: bold; }
+    .main-container {
+      max-width: 400px;
+      margin: 0 auto 30px auto;
+      padding: 8px 10px;
+      margin-left: 80px;
+      box-shadow: 0 2px 18px #0002;
+      background: #232338;
+      border-radius: 18px;
+    }
+    .section-title {
+      font-weight: 700;
+      font-size: 1.1em;
+      color: var(--amarelo);
+      margin: 14px 0 6px 0;
+      letter-spacing: 1px;
+    }
+    .produto-card {
+      background: #232338;
+      border-radius: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px 8px 8px 4px;
+      box-shadow: 0 1px 6px #0002;
+    }
+    .produto-img {
+      width: 60px; height: 60px; object-fit: cover;
+      border-radius: 10px; border: 2px solid #fff1;
+      background: #fff;
+    }
+    .produto-info { flex: 1; }
+    .produto-nome { font-size: 1em; }
+    .produto-desc { font-size: 0.9em; }
+    .produto-preco { font-size: 1em; }
+    .produto-preco-antigo {
+      color: #bbb; font-size: 0.95em; text-decoration: line-through;
+    }
+    .produto-btn {
+      background: var(--vermelho);
+      color: #fff; font-weight: bold;
+      border: none; border-radius: 8px;
+      padding: 6px 12px; font-size: 0.95em; cursor: pointer;
+      transition: background .22s;
+      margin-top: 8px;
+    }
+    .produto-btn:hover { background: #ad2234; }
+    /* Carrinho (posicione como preferir, só exemplo) */
+    #btn-carrinho {
+      position: fixed;
+      bottom: 30px; right: 40px;
+      background: var(--amarelo);
+      color: #d32f2f;
+      font-size: 1.5em;
+      font-weight: bold;
+      border: none; border-radius: 50px;
+      padding: 10px 20px;
+      cursor: pointer; box-shadow: 0 4px 28px #0004;
+      z-index: 90;
+      display: flex; align-items: center; gap: 10px;
+      transition: transform 0.18s;
+    }
+    #btn-carrinho:hover { transform: scale(1.09);}
+    /* Modais (Carrinho, Perfil, Pedidos, Cupom, Cardápio) */
+    .modal-bg { /* Classe genérica para fundos de modal */
+      position: fixed; top:0; left:0; width:100vw; height:100vh;
+      background: rgba(10,10,18,0.86);
+      z-index: 999;
+      display: none; /* Inicia escondido */
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content { /* Classe genérica para o conteúdo do modal */
+      background: #fff;
+      border-radius: 22px;
+      max-width: 370px; width: 94vw;
+      padding: 38px 24px 18px 24px;
+      box-shadow: 0 9px 44px #0007;
+      min-height: 160px;
+      position: relative;
+      animation: popIn .5s;
+      color: #232338;
+      box-sizing: border-box; /* Garante que padding não aumente a largura */
+    }
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0;}
+      to   { transform: scale(1); opacity: 1;}
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eaeaea;
+      font-size: 1em;
+    }
+    .cart-remove-btn {
+      margin-left: 7px;
+      background: #ffdddd;
+      color: #d32f2f;
+      border: none;
+      border-radius: 4px;
+      padding: 3px 7px;
+      cursor: pointer;
+      font-size: 0.94em;
+      font-weight: bold;
+      transition: background 0.16s;
+    }
+    .cart-remove-btn:hover { background: #ffe66e; }
+    .cart-footer {
+      margin-top: 14px;
+      text-align: right;
+      font-size: 2.15em;
+      font-weight: bold;
+    }
+    .pedido-antigo {
+      background: #ffefef; border-left: 5px solid #d32f2f; padding: 8px 10px 5px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 1em;
+    }
+    /* Estilos para os botões de filtro de categoria (agora dentro do modal) */
+    .category-nav {
+      background: #232338; /* Fundo escuro para a barra de categorias */
+      display: flex;
+      overflow-x: auto; /* Permite rolagem horizontal se muitos botões */
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      margin-bottom: 20px; /* Espaço abaixo da barra de categorias */
+    }
+    .category-nav .filter-btn {
+      background: none;
+      border: none;
+      color: #fff; /* Cor do texto padrão */
+      font-weight: bold;
+      padding: 10px 15px;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: background .18s, color .18s;
+      border-radius: 8px; /* Cantos arredondados */
+      margin: 0 5px; /* Espaçamento entre os botões */
+    }
+    .category-nav .filter-btn:hover {
+      background: #3a3a5a; /* Cor de fundo ao passar o mouse */
+    }
+    .category-nav .filter-btn.active {
+      background: var(--amarelo); /* Cor de fundo para o botão ativo */
+      color: var(--preto); /* Cor do texto para o botão ativo */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    /* Estilo para a área de listagem de produtos com rolagem interna (agora dentro do modal) */
+    #product-listing {
+      max-height: calc(100vh - 400px); /* Ajuste conforme necessário para o espaço disponível */
+      overflow-y: auto; /* Adiciona barra de rolagem vertical */
+      padding-right: 10px; /* Espaço para a barra de rolagem */
+    }
+    /* Estilo para a barra de rolagem (opcional, para customização) */
+    #product-listing::-webkit-scrollbar {
+      width: 8px;
+    }
+    #product-listing::-webkit-scrollbar-track {
+      background: #2e2e4a;
+      border-radius: 10px;
+    }
+    #product-listing::-webkit-scrollbar-thumb {
+      background: var(--roxo);
+      border-radius: 10px;
+    }
+    #product-listing::-webkit-scrollbar-thumb:hover {
+      background: var(--vermelho);
+    }
+
+    /* Estilos para o Modal de Perfil */
+   #profile-modal .modal-content {
+      background: #232338; /* Fundo escuro para combinar com o tema */
+      color: #fff;
+      max-width: 420px; /* Reduzido para ser mais compacto */
+      width: 94vw; /* Mantém a responsividade */
+      padding: 25px; /* Padding um pouco menor */
+      max-height: 85vh; /* Adiciona altura máxima para rolagem em telas pequenas */
+      overflow-y: auto; /* Adiciona barra de rolagem se o conteúdo for muito longo */
+      box-sizing: border-box; /* Garante que padding não aumente a largura total */
+    }
+    #profile-modal h2 {
+      color: var(--amarelo);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    #profile-modal .form-group {
+      margin-bottom: 15px;
+    }
+    #profile-modal label {
+      color: #fff;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    #profile-modal input[type="text"],
+    #profile-modal input[type="email"],
+    #profile-modal input[type="date"],
+    #profile-modal select {
+      background: #181829;
+      border: 1.5px solid #7d37ff33;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    #profile-modal input::placeholder {
+      color: #bbb;
+    }
+    #profile-modal .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    #profile-modal .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    #profile-modal .btn-save {
+      background: #4CAF50;
+      color: white;
+      padding: 15px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      margin-top: 25px;
+      width: 100%;
+    }
+    .btn-close-modal { /* Estilo genérico para botões de fechar modal */
+      background: #eee;
+      color: #232338;
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Estilos para o Modal de Pedidos */
+    #orders-modal .modal-content {
+      background: #232338;
+      color: #fff;
+      max-width: 500px;
+      max-height: 80vh; /* Para rolagem interna se muitos pedidos */
+      overflow-y: auto;
+      padding: 30px;
+    }
+    #orders-modal h2 {
+      color: var(--amarelo);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #orders-modal .order-item {
+      background: #2e2e4a;
+      border: 1px solid #3a3a5a;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      color: #fff;
+    }
+    #orders-modal .order-item strong {
+      color: var(--amarelo);
+    }
+    #orders-modal .order-item ul {
+      list-style: none;
+      padding: 0;
+      margin: 5px 0 0 0;
+    }
+    #orders-modal .order-item li {
+      margin-bottom: 3px;
+    }
+
+    /* NOVO: Estilos para o Modal de Cardápio */
+    #menu-modal .modal-content {
+      background: #232338;
+      color: #fff;
+      max-width: 700px; /* AUMENTADO: Mais largura para o cardápio */
+      width: 94vw; /* Mantém a responsividade */
+      padding: 30px;
+      max-height: 90vh; /* Aumenta a altura máxima para mais produtos */
+      overflow-y: auto; /* Garante rolagem vertical */
+    }
+    #menu-modal h2 {
+      color: var(--amarelo);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #menu-modal .category-nav {
+      /* Estilos já definidos acima, mas garantindo que se apliquem ao modal */
+      margin-left: 0; /* Remove o margin-left específico do layout principal */
+      margin-bottom: 20px;
+    }
+    #menu-modal .produto-img {
+      width: 90px; /* AUMENTADO: Imagens maiores */
+      height: 90px; /* AUMENTADO: Imagens maiores */
+      border-radius: 12px;
+      border: 2px solid #fff1;
+      background: #fff;
+    }
+    #menu-modal .produto-card {
+      gap: 20px; /* Aumenta o espaçamento entre imagem e info */
+    }
+
+    /* Media queries */
+    @media (max-width: 600px) {
+      .main-container { padding: 7px; }
+      .produto-card { padding: 7px 7px 7px 2px; }
+      .promocao-dia { padding: 0.8em 0.3em; font-size: 1em;}
+      .header-bg { min-height: 130px;}
+      .logo-central { width: 130px;}
+      .section-title { font-size: 1em;}
+      #btn-carrinho { font-size: 1.4em; padding: 9px 19px;}
+      .category-nav { margin-left: 44px; } /* Ajuste para sidebar menor */
+      #product-listing { max-height: calc(100vh - 300px); } /* Ajuste para telas menores */
+      #profile-modal .form-row, #menu-modal .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      #profile-modal .form-row .form-group, #menu-modal .form-row .form-group {
+        margin-bottom: 15px;
+      }
+      /* Ajustes específicos para o modal do cardápio em telas pequenas */
+      #menu-modal .modal-content {
+        max-width: 96vw; /* Quase toda a largura da tela */
+        padding: 15px;
+      }
+      #menu-modal .produto-img {
+        width: 70px; /* Volta para o tamanho menor em mobile */
+        height: 70px;
+      }
+      #menu-modal .produto-card {
+        gap: 10px; /* Reduz o espaçamento em mobile */
+      }
+    }
+    /* Adições para melhorar a visibilidade em mobile */
+    @media (max-width: 400px) {
+        .main-container {
+            padding: 5px; /* Reduz ainda mais o padding em telas muito pequenas */
+        }
+        .promocao-dia {
+            font-size: 0.9em; /* Texto da promoção menor */
+            padding: 0.7em 0.2em;
+        }
+        .status-bar {
+            font-size: 0.9em;
+            gap: 1em;
+        }
+        .sidebar {
+            width: 40px; /* Sidebar ainda menor */
+        }
+        .sidebar .side-link {
+            font-size: 0.75em;
+            padding: 10px 0 5px 0;
+        }
+        .sidebar .side-link i {
+            font-size: 1em;
+        }
+        .main-container, .header-bg, .promocao-dia, .status-bar {
+            margin-left: 40px !important; /* Ajusta o margin-left para a sidebar menor */
+        }
+        .modal-content {
+            padding: 20px 15px 10px 15px; /* Reduz padding dos modais em telas pequenas */
+        }
+        #btn-carrinho {
+            right: 15px; /* Botão do carrinho mais próximo da borda */
+            bottom: 15px;
+            font-size: 1.2em;
+            padding: 7px 15px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar lateral com ícones grandes -->
+  <div class="sidebar">
+    <a href="#" class="side-link active" id="menu-inicio">
+      <i>🏠</i>
+      <span>Início</span>
+    </a>
+    <a href="#" class="side-link" id="menu-perfil">
+      <i>👤</i>
+      <span>Perfil</span>
+    </a>
+    <a href="#" class="side-link" id="menu-cardapio">
+      <i>🍔</i>
+      <span>Cardápio</span>
+    </a>
+    <a href="#" class="side-link" id="menu-pedidos">
+      <i>⏰</i>
+      <span>Pedidos</span>
+    </a>
+  </div>
+
+  <div class="header-bg">
+    <img src="logo-gf.png" alt="GF Frango Assado" class="logo-central" />
+  </div>
+
+  <div class="promocao-dia">
+    <span>Cupom do Dia: <b>GF10</b> - Use e ganhe 10% de desconto hoje!</span>
+  </div>
+
+  <div class="status-bar">
+    <span id="store-status" class="status-aberto">🟢 Aberto</span>
+    <span>40 a 60min</span>
+    <span>ℹ️ Infos</span>
+  </div>
+
+  <div class="main-container">
+    <p style="color: #fff; text-align: center; margin-top: 30px;">Bem-vindo ao GF Frango Assado! Use o menu lateral para navegar.</p>
+    <!-- Seção de Mais Vendidos -->
+    <section id="most-sold-products-section">
+        <h2 class="section-title">🔥 Mais Vendidos</h2>
+        <div id="most-sold-products-list">
+            <p style="color:#bbb; text-align: center;">Carregando produtos mais vendidos...</p>
+        </div>
+    </section>
+  </div>
+
+  <!-- Botão carrinho (fixo, grande) -->
+  <button id="btn-carrinho">
+    🛒 <span id="cart-count">0</span>
+  </button>
+
+  <!-- Modal do Carrinho -->
+  <div class="modal-bg" id="cart-modal-bg">
+    <div class="modal-content">
+      <div id="pedido-antigo"></div>
+      <div id="cart-lista"></div>
+      <div id="discount-message"></div> <!-- Placeholder para mensagem de desconto -->
+      <div class="cart-footer" id="cart-total"></div>
+      <div style="margin:15px 0;">
+        <input type="text" id="cliente-nome" placeholder="Nome (opcional)" style="width:98%;margin-bottom:7px;"><br>
+        <input type="text" id="cliente-telefone" placeholder="Telefone (opcional)" style="width:98%;margin-bottom:7px;">
+        <select id="modo-entrega" style="width:99%;margin-bottom:7px;">
+          <option value="Retirada">Retirada</option>
+          <option value="Delivery">Delivery (+R$5,00)</option>
+        </select>
+        <input type="text" id="cliente-endereco" placeholder="Endereço (só para delivery)" style="display:none;width:98%;margin-bottom:7px;">
+        <select id="forma-pagamento" style="width:99%;">
+          <option>Dinheiro</option>
+          <option>Cartão</option>
+          <option>Pix</option>
+        </select>
+      </div>
+      <button class="produto-btn" id="whatsapp-button" style="width:100%;margin-top:10px;">Finalizar Pedido via WhatsApp</button>
+      <button class="cart-remove-btn" id="close-cart" style="width:100%;margin-top:5px;background:#eee;color:#232338;">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Modal de Perfil do Cliente -->
+  <div class="modal-bg" id="profile-modal-bg">
+    <div class="modal-content" id="profile-modal">
+      <h2>Meu Perfil</h2>
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="profile-name">Nome Completo:</label>
+          <input type="text" id="profile-name" placeholder="Seu nome completo">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="profile-cpf-cnpj">CPF/CNPJ:</label>
+            <input type="text" id="profile-cpf-cnpj" placeholder="CPF ou CNPJ">
+          </div>
+          <div class="form-group">
+            <label for="profile-birthdate">Data de Nascimento:</label>
+            <input type="date" id="profile-birthdate">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="profile-phone">Telefone:</label>
+            <input type="text" id="profile-phone" placeholder="DDD+Número (ex: 11987654321)" pattern="[0-9]{10,11}" title="Apenas números, com DDD (ex: 11987654321)">
+          </div>
+          <div class="form-group">
+            <label for="profile-gender">Gênero (Opcional):</label>
+            <select id="profile-gender">
+              <option value="">Selecione</option>
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="profile-email">E-mail (Opcional):</label>
+          <input type="email" id="profile-email" placeholder="Seu melhor e-mail">
+        </div>
+
+        <div class="form-group">
+          <label for="profile-cep">CEP:</label>
+          <input type="text" id="profile-cep" placeholder="Apenas números (ex: 00000000)" pattern="[0-9]{8}" title="Apenas 8 números do CEP">
+        </div>
+
+        <div class="form-group">
+          <label for="profile-address">Endereço:</label>
+          <input type="text" id="profile-address" placeholder="Rua, Avenida, etc.">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="profile-number">Número:</label>
+            <input type="text" id="profile-number" placeholder="Número">
+          </div>
+          <div class="form-group">
+            <label for="profile-complement">Complemento (Opcional):</label>
+            <input type="text" id="profile-complement" placeholder="Apto, Bloco, Casa, etc.">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="profile-neighborhood">Bairro:</label>
+          <input type="text" id="profile-neighborhood" placeholder="Seu bairro">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="profile-city">Cidade:</label>
+            <input type="text" id="profile-city" placeholder="Sua cidade">
+          </div>
+          <div class="form-group">
+            <label for="profile-state">Estado (UF):</label>
+            <input type="text" id="profile-state" placeholder="UF (ex: SP)">
+          </div>
+        </div>
+
+        <button type="submit" class="btn produto-btn btn-save">Salvar Perfil</button>
+      </form>
+      <button class="btn-close-modal" id="close-profile-modal">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Modal de Cardápio -->
+  <div class="modal-bg" id="menu-modal-bg">
+    <div class="modal-content" id="menu-modal">
+      <h2>Nosso Cardápio</h2>
+      <!-- Barra de filtros de categoria (agora dentro do modal) -->
+      <div class="category-nav" id="category-filter-nav">
+        <!-- Os botões de filtro de categoria serão inseridos aqui pelo JavaScript -->
+      </div>
+      <!-- Lista de produtos (agora dentro do modal) -->
+      <div id="product-listing">
+        <!-- Os produtos serão inseridos aqui pelo JavaScript -->
+        <p>Carregando produtos...</p>
+      </div>
+      <button class="btn-close-modal" id="close-menu-modal">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Modal de Histórico de Pedidos -->
+  <div class="modal-bg" id="orders-modal-bg">
+    <div class="modal-content" id="orders-modal">
+      <h2>Seus Pedidos Anteriores</h2>
+      <div id="orders-history-list">
+        <p>Carregando histórico...</p>
+      </div>
+      <button class="btn-close-modal" id="close-orders-modal">Fechar</button>
+    </div>
+  </div>
+
+  <!-- POPUP CUPOM -->
+  <div id="popup-cupom-bg" class="modal-bg">
+    <div class="modal-content cupom-popup">
+      <div class="cupom-popup-title">🎁 Cupom Especial para Você</div>
+      <div class="cupom-popup-desc">
+        Use o cupom abaixo ao finalizar seu pedido e ganhe <b>10% de desconto</b> hoje!
+      </div>
+      <span class="cupom-codigo">GF10</span>
+      <br>
+      <button class="cupom-popup-fechar" onclick="fecharPopupCupom()">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Carrega o script principal do Firebase e o seu script.js -->
+  <script src="script.js" type="module"></script>
+</body>
+>>>>>>> b73244e1951affabae61f7ec9de19e6d292cbdb8
 </html>
